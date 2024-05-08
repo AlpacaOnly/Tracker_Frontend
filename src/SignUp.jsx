@@ -4,15 +4,29 @@ import { Link } from 'react-router-dom';
 const SignUp = () => {
   const [formData, setFormData] = useState({
     name: "",
+    surname: "",
     email: "",
-    password: ""
+    password: "",
+    RoleID: 2 // Default RoleID for 'student'
   });
 
+  const roleMapping = {
+    student: 2,
+    teacher: 1,
+    admin: 3
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "role") {
+      setFormData({ ...formData, RoleID: roleMapping[value] });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
+    console.log(formData)
     e.preventDefault();
     try {
       const response = await fetch('http://localhost:8080/auth/signup', {
@@ -20,7 +34,13 @@ const SignUp = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          name: formData.name,
+          surname: formData.surname,
+          email: formData.email,
+          password: formData.password,
+          RoleID: formData.RoleID
+        })
       });
       if (response.ok) {
         const data = await response.json();
@@ -52,6 +72,15 @@ const SignUp = () => {
           />
           <input
             className="text-sm w-full px-4 py-2 border border-solid border-gray-300 rounded mt-4"
+            type="text"
+            placeholder="Surname"
+            name="surname"
+            value={formData.surname}
+            onChange={handleChange}
+            required
+          />
+          <input
+            className="text-sm w-full px-4 py-2 border border-solid border-gray-300 rounded mt-4"
             type="email"
             placeholder="Email Address"
             name="email"
@@ -68,6 +97,17 @@ const SignUp = () => {
             onChange={handleChange}
             required
           />
+          <select
+            className="text-sm w-full px-4 py-2 border border-solid border-gray-300 rounded mt-4"
+            name="role"
+            value={Object.keys(roleMapping).find(key => roleMapping[key] === formData.RoleID)}
+            onChange={handleChange}
+            required
+          >
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+            <option value="admin">Admin</option>
+          </select>
           <div className="text-center md:text-left">
             <button
               className="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white uppercase rounded text-xs tracking-wider"

@@ -9,7 +9,8 @@ const ExamDetailPage = () => {
     const [taskDescription, setTaskDescription] = useState("");
     const [timer, setTimer] = useState(1800); // 30 minutes for the timer
     const [intervalId, setIntervalId] = useState(null);
-    const [submissionMessage, setSubmissionMessage] = useState(""); // State to store the submission message
+    const [submissionMessage, setSubmissionMessage] = useState("");
+    const [ws, setWs] = useState(null);
 
     useEffect(() => {
         const fetchExamDetails = async () => {
@@ -24,8 +25,20 @@ const ExamDetailPage = () => {
 
         fetchExamDetails();
 
-        // Cleanup to clear the interval when the component unmounts
+        // Initialize WebSocket connection
+        const webSocket = new WebSocket('ws://localhost:8001');
+        webSocket.onopen = () => {
+            console.log('WebSocket Connected');
+        };
+        webSocket.onclose = () => {
+            console.log('WebSocket Disconnected');
+        };
+        setWs(webSocket);
+
         return () => {
+            if (webSocket) {
+                webSocket.close(); // Close WebSocket connection when component unmounts
+            }
             if (intervalId) {
                 clearInterval(intervalId);
             }
@@ -34,6 +47,9 @@ const ExamDetailPage = () => {
 
     const handleStartExam = () => {
         setExamStarted(true);
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send('start'); // Send start message when exam starts
+        }
         const id = setInterval(() => {
             setTimer((prevTimer) => {
                 if (prevTimer <= 1) {
@@ -47,11 +63,13 @@ const ExamDetailPage = () => {
     };
 
     const handleEndExam = () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send('stop'); // Send stop message when exam ends
+        }
         clearInterval(intervalId);
         setExamStarted(false);
         setSubmissionMessage("Your exam has been submitted and is pending review by a teacher. You will see your grade on the Grades page.");
         console.log("Task Submitted:", taskDescription);
-        // Clear the task description after logging
         setTaskDescription("");
     };
 
