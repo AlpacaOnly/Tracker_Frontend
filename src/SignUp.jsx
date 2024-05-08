@@ -11,8 +11,8 @@ const SignUp = () => {
   });
 
   const roleMapping = {
-    student: 2,
-    teacher: 1,
+    student: 1,
+    teacher: 2,
     admin: 3
   };
 
