@@ -8,6 +8,7 @@ import Grades from "./Grades";
 import Assignments from "./Assignments";
 import Examinations from "./Examinations";
 import ExamDetailPage from "./ExamDetailPage";
+import AddExamination from "./AddExamination";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="assignments" element={<Assignments />} />
           <Route path="examinations" element={<Examinations />} />
           <Route path="/exam/:subject" element={<ExamDetailPage />} />
+          <Route path="examination/add" element={<AddExamination />} />
         
     
         <Route path="/" element={<Login />} />
