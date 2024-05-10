@@ -5,6 +5,8 @@ import Navbar from './Navbar';
 const AddExamination = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [accessFrom, setAccessFrom] = useState(new Date()); // Initialize with current date and time
+    const [accessTo, setAccessTo] = useState(new Date()); // Initialize with current date and time
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
@@ -20,7 +22,9 @@ const AddExamination = () => {
                 },
                 body: JSON.stringify({
                     title: title,
-                    description: description
+                    description: description,
+                    accessFrom: accessFrom.toISOString(), // Convert datetime to ISO string format
+                    accessTo: accessTo.toISOString() // Convert datetime to ISO string format
                 })
             });
 
@@ -53,13 +57,35 @@ const AddExamination = () => {
                             required
                         />
                     </div>
-                    <div className="mb-6">
+                    <div className="">
                         <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-2">Description:</label>
                         <textarea
                             id="description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                            required
+                        />
+                    </div>
+                    <div className="mb-6">
+                        <label htmlFor="accessFrom" className="block text-gray-700 text-sm font-bold mb-2">Access From</label>
+                        <input
+                            type="datetime-local"
+                            id="accessFrom"
+                            value={accessFrom.toISOString().slice(0, -8)} // Convert datetime to local datetime format
+                            onChange={(e) => setAccessFrom(new Date(e.target.value))}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            required
+                        />
+                    </div>
+                    <div className="mb-6">
+                        <label htmlFor="accessTo" className="block text-gray-700 text-sm font-bold mb-2">Access To</label>
+                        <input
+                            type="datetime-local"
+                            id="accessTo"
+                            value={accessTo.toISOString().slice(0, -8)} // Convert datetime to local datetime format
+                            onChange={(e) => setAccessTo(new Date(e.target.value))}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             required
                         />
                     </div>

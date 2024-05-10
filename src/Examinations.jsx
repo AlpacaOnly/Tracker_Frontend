@@ -2,28 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 
-const examData = [
-    {
-        id: 1,
-        title: 'Advanced Programming',
-        description: 'Final exam covering all material from the semester.',
-        accessFrom: '2024-06-15',
-        accessTo: '09:00 AM to 12:00 PM'
-    }
-];
-
 const Examinations = () => {
-    const [roleID, setRoleID] = useState(null); // State to hold the role ID
+    const [exams, setExams] = useState([]); // State to hold examination data
     const navigate = useNavigate();
+    const userId = localStorage.getItem('RoleID');
 
     useEffect(() => {
-        // Fetch user role from localStorage or another state management solution
-        const fetchUserRole = async () => {
-            const userRole = localStorage.getItem('RoleID'); // Assuming the role is stored in localStorage
-            setRoleID(parseInt(userRole, 10)); // Convert to integer for strict comparison
+        // Fetch examination data from the API
+        const fetchExaminations = async () => {
+            try {
+                const token = localStorage.getItem('token'); // Get auth token from local storage
+                const response = await fetch(`http://localhost:8080/api/tasks/getAllTeacherTasks/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setExams(data); // Update state with fetched examination data
+                } else {
+                    console.error('Failed to fetch examinations:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error fetching examinations:', error);
+            }
         };
 
-        fetchUserRole();
+        fetchExaminations();
     }, []);
 
     const handleStartExam = (exam) => {
@@ -39,14 +45,12 @@ const Examinations = () => {
             <Navbar/>
             <div className="container mx-auto p-4">
                 <h1 className="text-xl font-bold text-gray-800 mb-4">Upcoming Examinations</h1>
-                {roleID === 2 && (
-                    <button
-                        onClick={handleAddExamination}
-                        className="mb-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                        Add Examination
-                    </button>
-                )}
+                <button
+                    onClick={handleAddExamination}
+                    className="mb-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                >
+                    Add Examination
+                </button>
                 <table className="min-w-full table-auto">
                     <thead className="bg-gray-200">
                         <tr>
@@ -58,7 +62,7 @@ const Examinations = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {examData.map((exam) => (
+                        {exams.map((exam) => (
                             <tr key={exam.id} className="bg-white border-b">
                                 <td className="px-4 py-2">{exam.title}</td>
                                 <td className="px-4 py-2">{exam.description}</td>
