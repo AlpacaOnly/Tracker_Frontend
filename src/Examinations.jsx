@@ -5,14 +5,15 @@ import Navbar from './Navbar';
 const Examinations = () => {
     const [exams, setExams] = useState([]); // State to hold examination data
     const navigate = useNavigate();
-    const userId = localStorage.getItem('RoleID');
+    const ID = localStorage.getItem('ID');
 
     useEffect(() => {
         // Fetch examination data from the API
+        console.log(ID)
         const fetchExaminations = async () => {
             try {
                 const token = localStorage.getItem('token'); // Get auth token from local storage
-                const response = await fetch(`http://localhost:8080/api/tasks/getAllTeacherTasks/${userId}`, {
+                const response = await fetch(`http://localhost:8080/api/tasks/teacher/${ID}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -20,6 +21,7 @@ const Examinations = () => {
                 });
                 if (response.ok) {
                     const data = await response.json();
+                    console.log(data)
                     setExams(data); // Update state with fetched examination data
                 } else {
                     console.error('Failed to fetch examinations:', response.statusText);
@@ -38,6 +40,11 @@ const Examinations = () => {
 
     const handleAddExamination = () => {
         navigate('/examination/add'); // Adjust the route as necessary
+    };
+
+    const formatDate = (isoString) => {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' }; // Options to display the date
+        return new Date(isoString).toLocaleDateString('en-US', options);
     };
 
     return (
@@ -63,11 +70,11 @@ const Examinations = () => {
                     </thead>
                     <tbody>
                         {exams.map((exam) => (
-                            <tr key={exam.id} className="bg-white border-b">
-                                <td className="px-4 py-2">{exam.title}</td>
-                                <td className="px-4 py-2">{exam.description}</td>
-                                <td className="px-4 py-2">{exam.accessFrom}</td>
-                                <td className="px-4 py-2">{exam.accessTo}</td>
+                            <tr key={exam.ID} className="bg-white border-b">
+                                <td className="px-4 py-2">{exam.Title}</td>
+                                <td className="px-4 py-2">{exam.Description}</td>
+                                <td className="px-4 py-2">{formatDate(exam.AccessFrom)}</td>
+                                <td className="px-4 py-2">{formatDate(exam.AccessTo)}</td>
                                 <td className="px-4 py-2">
                                     <button
                                         onClick={() => handleStartExam(exam)}

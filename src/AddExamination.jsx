@@ -1,36 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 
 const AddExamination = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [accessFrom, setAccessFrom] = useState(new Date()); // Initialize with current date and time
-    const [accessTo, setAccessTo] = useState(new Date()); // Initialize with current date and time
+    const [accessFrom, setAccessFrom] = useState(new Date());
+    const [accessTo, setAccessTo] = useState(new Date());
+    const [students, setStudents] = useState([]);
+    const [selectedStudent, setSelectedStudent] = useState('');
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchStudents = async () => {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch('http://localhost:8080/api/users', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setStudents(data); // Assuming 'data' is an array of student objects
+                } else {
+                    throw new Error('Failed to fetch students');
+                }
+            } catch (error) {
+                console.error('Error fetching students:', error);
+            }
+        };
+    
+        fetchStudents();
+    }, []);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const token = localStorage.getItem('token'); // Get auth token from local storage
+        const token = localStorage.getItem('token');
 
         try {
-            const response = await fetch('http://localhost:8080/api/tasks/create', {
+            const response = await fetch(`http://localhost:8080/api/tasks/create`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    title: title,
-                    description: description,
-                    accessFrom: accessFrom.toISOString(), // Convert datetime to ISO string format
-                    accessTo: accessTo.toISOString() // Convert datetime to ISO string format
+                    Title: title,
+                    Description: description,
+                    AccessFrom: accessFrom.toISOString(),
+                    AccessTo: accessTo.toISOString(),
+                    StudentID: selectedStudent
                 })
             });
 
             if (response.ok) {
                 console.log('Examination added successfully');
-                navigate('/examinations'); // Navigate back to the examinations page or to a success page
+                navigate('/examinations');
             } else {
                 const errorMsg = await response.text();
                 throw new Error(errorMsg || 'Failed to add examination');
@@ -72,7 +99,7 @@ const AddExamination = () => {
                         <input
                             type="datetime-local"
                             id="accessFrom"
-                            value={accessFrom.toISOString().slice(0, -8)} // Convert datetime to local datetime format
+                            value={accessFrom.toISOString().slice(0, -8)}
                             onChange={(e) => setAccessFrom(new Date(e.target.value))}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             required
@@ -83,11 +110,28 @@ const AddExamination = () => {
                         <input
                             type="datetime-local"
                             id="accessTo"
-                            value={accessTo.toISOString().slice(0, -8)} // Convert datetime to local datetime format
+                            value={accessTo.toISOString().slice(0, -8)}
                             onChange={(e) => setAccessTo(new Date(e.target.value))}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             required
                         />
+                    </div>
+                    <div className="mb-6">
+                        <label htmlFor="student" className="block text-gray-700 text-sm font-bold mb-2">Assign Student</label>
+                        <select
+                        id="student"
+                        value={selectedStudent}
+                        onChange={(e) => setSelectedStudent(e.target.value)}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required
+                    >
+                        <option value="">Select a student</option>
+                        {students.map(student => (
+                            <option key={student.ID} value={student.ID}>
+                                {student.Name} {student.Surname}
+                            </option>
+                        ))}
+                    </select>
                     </div>
                     <div className="flex items-center justify-between">
                         <button

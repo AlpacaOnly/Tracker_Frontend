@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from './Navbar';
+import MonacoEditor from 'react-monaco-editor';  // Import MonacoEditor
+import CodeEditor from './MonacoEditor/components/CodeEditor';
+
+// import CodeEditor from "./Components/CodeEditor";
 
 const ExamDetailPage = () => {
     const { subject } = useParams();
@@ -37,7 +41,7 @@ const ExamDetailPage = () => {
 
         return () => {
             if (webSocket) {
-                webSocket.close(); // Close WebSocket connection when component unmounts
+                webSocket.close();
             }
             if (intervalId) {
                 clearInterval(intervalId);
@@ -48,7 +52,7 @@ const ExamDetailPage = () => {
     const handleStartExam = () => {
         setExamStarted(true);
         if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send('start'); // Send start message when exam starts
+            ws.send('start');
         }
         const id = setInterval(() => {
             setTimer((prevTimer) => {
@@ -64,7 +68,7 @@ const ExamDetailPage = () => {
 
     const handleEndExam = () => {
         if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send('stop'); // Send stop message when exam ends
+            ws.send('stop');
         }
         clearInterval(intervalId);
         setExamStarted(false);
@@ -105,12 +109,9 @@ const ExamDetailPage = () => {
                         ) : (
                             <div>
                                 <p className="text-red-500 font-bold">Time remaining: {formatTime(timer)}</p>
-                                <textarea
-                                    className="w-full h-32 p-2 border border-gray-300 rounded mt-4"
-                                    placeholder="Enter your task description here..."
-                                    value={taskDescription}
-                                    onChange={(e) => setTaskDescription(e.target.value)}
-                                ></textarea>
+                                
+                                <CodeEditor />
+                                
                                 <button onClick={handleEndExam} className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                                     Submit Exam
                                 </button>

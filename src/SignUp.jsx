@@ -9,6 +9,8 @@ const SignUp = () => {
     password: "",
     RoleID: 2 // Default RoleID for 'student'
   });
+  
+  const [successMessage, setSuccessMessage] = useState(""); // State to hold success message
 
   const roleMapping = {
     student: 1,
@@ -26,7 +28,6 @@ const SignUp = () => {
   };
 
   const handleSubmit = async (e) => {
-    console.log(formData)
     e.preventDefault();
     try {
       const response = await fetch('http://localhost:8080/auth/signup', {
@@ -45,7 +46,7 @@ const SignUp = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Signup successful:', data);
-        // Optionally, redirect the user or show a success message
+        setSuccessMessage("Successfully signed up!"); // Set success message
       } else {
         throw new Error('Failed to sign up.');
       }
@@ -117,6 +118,11 @@ const SignUp = () => {
             </button>
           </div>
         </form>
+        {successMessage && (
+          <div className="mt-4 font-semibold text-sm text-green-600 text-center md:text-left">
+            {successMessage}
+          </div>
+        )}
         <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-left">
           Already have an account?{" "}
           <Link

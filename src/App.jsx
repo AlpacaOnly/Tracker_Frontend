@@ -9,6 +9,8 @@ import Assignments from "./Assignments";
 import Examinations from "./Examinations";
 import ExamDetailPage from "./ExamDetailPage";
 import AddExamination from "./AddExamination";
+import { useEffect } from "react";
+
 
 function App() {
   return (
