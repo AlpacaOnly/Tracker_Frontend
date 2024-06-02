@@ -31,8 +31,10 @@ const AddAssignment = () => {
     };
 
     return (
-        <div>
-            <h1>Add New Assignment</h1>
+        <div class="flex items-center justify-center">
+            
+             <h1>Add New Assignment</h1>
+
             <form onSubmit={handleSubmit}>
                 <label>
                     Title:

@@ -18,8 +18,6 @@ const Profile = () => {
                 if (response.ok) {
                     const data = await response.json();
                     setUserData(data);
-                    localStorage.setItem('RoleID', data.RoleID) 
-                    localStorage.setItem('ID', data.ID)
                     console.log("Profile Data:", data);  // Log the data to the console
                 } else {
                     throw new Error('Failed to fetch profile data');
@@ -36,6 +34,19 @@ const Profile = () => {
         console.log("User logged out");
         localStorage.removeItem('token');
         window.location.href = '/login';  // Redirect to login page
+    };
+
+    const getRoleName = (roleId) => {
+        switch (roleId) {
+            case 1:
+                return 'Student';
+            case 2:
+                return 'Teacher';
+            case 3:
+                return 'Admin';
+            default:
+                return 'Unknown';  // Fallback for unknown RoleID
+        }
     };
 
     if (!userData) {
@@ -61,7 +72,7 @@ const Profile = () => {
                 </div>
                 <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2">Role</label>
-                    <div className="p-3 bg-gray-100 rounded">{userData.RoleID}</div>
+                    <div className="p-3 bg-gray-100 rounded">{getRoleName(userData.RoleID)}</div>
                 </div>
                 <button onClick={handleLogout} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                     Logout

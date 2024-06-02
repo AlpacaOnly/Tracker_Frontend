@@ -51,7 +51,7 @@ const Examinations = () => {
         <div className="flex">
             <Navbar/>
             <div className="container mx-auto p-4">
-                <h1 className="text-xl font-bold text-gray-800 mb-4">Upcoming Examinations</h1>
+                <h1 className="text-xl font-bold text-white mb-4">Upcoming Examinations</h1>
                 <button
                     onClick={handleAddExamination}
                     className="mb-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
@@ -59,7 +59,7 @@ const Examinations = () => {
                     Add Examination
                 </button>
                 <table className="min-w-full table-auto">
-                    <thead className="bg-gray-200">
+                    <thead className="bg-gray-800">
                         <tr>
                             <th className="px-4 py-2 text-left">Title</th>
                             <th className="px-4 py-2 text-left">Description</th>
@@ -70,7 +70,7 @@ const Examinations = () => {
                     </thead>
                     <tbody>
                         {exams.map((exam) => (
-                            <tr key={exam.ID} className="bg-white border-b">
+                            <tr key={exam.ID} className="bg-gray-700 border-b">
                                 <td className="px-4 py-2">{exam.Title}</td>
                                 <td className="px-4 py-2">{exam.Description}</td>
                                 <td className="px-4 py-2">{formatDate(exam.AccessFrom)}</td>

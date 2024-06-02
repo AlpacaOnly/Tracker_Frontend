@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Box, Button, Text, useToast } from "@chakra-ui/react";
 import { executeCode } from "../api";
 
 const Output = ({ editorRef, language }) => {
-  const [output, setOutput] = useState([]);
+  const toast = useToast();
+  const [output, setOutput] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 
@@ -11,36 +13,49 @@ const Output = ({ editorRef, language }) => {
     if (!sourceCode) return;
     try {
       setIsLoading(true);
-      const result = await executeCode(language, sourceCode);
-      setOutput(result.output ? result.output.split("\n") : []);
-      setIsError(!!result.stderr);
+      const { run: result } = await executeCode(language, sourceCode);
+      setOutput(result.output.split("\n"));
+      result.stderr ? setIsError(true) : setIsError(false);
     } catch (error) {
-      setIsError(true);
-      setOutput([error.message]);
+      console.log(error);
+      toast({
+        title: "An error occurred.",
+        description: error.message || "Unable to run code",
+        status: "error",
+        duration: 6000,
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="text-center w-full">
-      <h3 className="my-5 text-lg font-semibold">
+    <Box w="50%">
+      <Text mb={2} fontSize="lg">
         Output
-      </h3>
-      <button
+      </Text>
+      <Button
+        variant="outline"
+        colorScheme="green"
+        mb={4}
+        isLoading={isLoading}
         onClick={runCode}
-        disabled={isLoading}
-        className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
       >
-        {isLoading ? 'Running...' : 'Run Code'}
-      </button>
-      <div
-        className={`w-full h-64 p-4 mt-5 overflow-auto bg-black text-${isError ? 'red' : 'white'} border border-${isError ? 'red' : 'gray-800'} rounded-lg font-mono`}
+        Run Code
+      </Button>
+      <Box
+        height="75vh"
+        p={2}
+        color={isError ? "red.400" : ""}
+        border="1px solid"
+        borderRadius={4}
+        borderColor={isError ? "red.500" : "#333"}
       >
-        {output.length > 0 ? output.map((line, i) => <div key={i}>{line}</div>) : 'Click "Run Code" to see the output here'}
-      </div>
-    </div>
+        {output
+          ? output.map((line, i) => <Text key={i}>{line}</Text>)
+          : 'Click "Run Code" to see the output here'}
+      </Box>
+    </Box>
   );
 };
-
 export default Output;

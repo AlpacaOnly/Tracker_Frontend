@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from './Navbar';
-import MonacoEditor from 'react-monaco-editor';  // Import MonacoEditor
+// import MonacoEditor from 'react-monaco-editor';  // Import MonacoEditor
 import CodeEditor from './MonacoEditor/components/CodeEditor';
+import { Box } from '@chakra-ui/react';
+import { ChakraProvider } from '@chakra-ui/react';
+import theme from "./MonacoEditor/theme.js";
 
 // import CodeEditor from "./Components/CodeEditor";
 
@@ -110,7 +113,9 @@ const ExamDetailPage = () => {
                             <div>
                                 <p className="text-red-500 font-bold">Time remaining: {formatTime(timer)}</p>
                                 
-                                <CodeEditor />
+                                <Box minH="100vh" bg="#0f0a19" color="gray.500" px={6} py={8}>
+                                    <CodeEditor />
+                                </Box>
                                 
                                 <button onClick={handleEndExam} className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                                     Submit Exam
