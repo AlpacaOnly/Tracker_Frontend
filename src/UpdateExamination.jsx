@@ -9,8 +9,9 @@ const UpdateExamination = () => {
     const [accessTo, setAccessTo] = useState('');
     const [students, setStudents] = useState([]);
     const [selectedStudent, setSelectedStudent] = useState('');
-    const { examId } = useParams();
+    const { examid } = useParams();
     const navigate = useNavigate();
+    const ID = localStorage.getItem('ID'); // Assuming this is the TeacherID
 
     useEffect(() => {
         const fetchExaminationDetails = async () => {
@@ -20,7 +21,7 @@ const UpdateExamination = () => {
                 return;
             }
             try {
-                const response = await fetch(`http://localhost:8080/api/tasks/${examId}`, {
+                const response = await fetch(`http://localhost:8080/api/tasks/${examid}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -67,7 +68,7 @@ const UpdateExamination = () => {
 
         fetchExaminationDetails();
         fetchStudents();
-    }, [navigate, examId]);
+    }, [navigate, examid]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -77,12 +78,13 @@ const UpdateExamination = () => {
             Description: description,
             AccessFrom: new Date(accessFrom).toISOString(),
             AccessTo: new Date(accessTo).toISOString(),
-            StudentID: selectedStudent
+            TeacherID: parseInt(ID)
         });
 
-        try {
-            const response = await fetch(`http://localhost:8080/api/tasks/update/${examId}`, {
-                method: 'POST',
+        try {   
+            console.log(body)
+            const response = await fetch(`http://localhost:8080/api/tasks/update/${examid}`, {
+                method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
