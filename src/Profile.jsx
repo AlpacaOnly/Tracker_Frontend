@@ -57,22 +57,24 @@ const Profile = () => {
         <div className="flex">
             <Navbar />
             <div className="container mx-auto p-4 max-w-md">
-                <h1 className="text-xl font-bold text-gray-800 mb-4">Profile</h1>
-                <div className="mb-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-2">Name</label>
-                    <div className="p-3 bg-gray-100 rounded">{userData.Name}</div>
+                <div className="flex justify-center">
+                <h1 className="text-xl font-bold text-white">Profile</h1>
                 </div>
                 <div className="mb-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-2">Surname</label>
-                    <div className="p-3 bg-gray-100 rounded">{userData.Surname}</div>
+                    <label className="block text-white text-sm font-bold mb-2">Name</label>
+                    <div className="p-3 bg-gray-700 rounded">{userData.Name}</div>
                 </div>
                 <div className="mb-2">
-                    <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
-                    <div className="p-3 bg-gray-100 rounded">{userData.Email}</div>
+                    <label className="block text-white text-sm font-bold mb-2">Surname</label>
+                    <div className="p-3 bg-gray-700 rounded">{userData.Surname}</div>
+                </div>
+                <div className="mb-2">
+                    <label className="block text-white text-sm font-bold mb-2">Email</label>
+                    <div className="p-3 bg-gray-700 rounded">{userData.Email}</div>
                 </div>
                 <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2">Role</label>
-                    <div className="p-3 bg-gray-100 rounded">{getRoleName(userData.RoleID)}</div>
+                    <label className="block text-white text-sm font-bold mb-2">Role</label>
+                    <div className="p-3 bg-gray-700 rounded">{getRoleName(userData.RoleID)}</div>
                 </div>
                 <button onClick={handleLogout} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                     Logout

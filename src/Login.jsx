@@ -20,7 +20,8 @@ const Login = () => {
                 const data = await response.json();
                 console.log('Login successful:', data);
                 // Store the token, if your backend sends one
-                localStorage.setItem("RoleID", response.RoleID)
+                localStorage.setItem("roleID", response.roleID)
+                localStorage.setItem("id", response.id)
                 localStorage.setItem('token', data.token); // Assume the token is in data.token
                 navigate("/home"); // Redirects user to the Home page after login
             } else {
@@ -34,7 +35,7 @@ const Login = () => {
     return (
         <section className="h-screen flex flex-col md:flex-row justify-center space-y-10 md:space-y-0 md:space-x-16 items-center my-2 mx-5 md:mx-0 md:my-0">
             <div className="md:w-1/3 max-w-sm">
-                <h1 className="lg:text-2xl text-center p-2 text-gray-800 font-bold">
+                <h1 className="lg:text-2xl text-center p-2 text-white font-bold">
                     Login
                 </h1>
                 <form onSubmit={handleLogin}>

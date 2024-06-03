@@ -9,7 +9,7 @@ const Examinations = () => {
 
     useEffect(() => {
         // Fetch examination data from the API
-        console.log(ID)
+        console.log(ID);
         const fetchExaminations = async () => {
             try {
                 const token = localStorage.getItem('token'); // Get auth token from local storage
@@ -21,7 +21,7 @@ const Examinations = () => {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    console.log(data)
+                    console.log(data);
                     setExams(data); // Update state with fetched examination data
                 } else {
                     console.error('Failed to fetch examinations:', response.statusText);
@@ -32,10 +32,14 @@ const Examinations = () => {
         };
 
         fetchExaminations();
-    }, []);
+    }, [ID]);
 
     const handleStartExam = (exam) => {
-        navigate(`/exam/${exam.id}`);
+        navigate(`/exam/${exam.ID}`);
+    };
+
+    const handleUpdateExam = (examId) => {
+        navigate(`/examination/update/${examId}`);
     };
 
     const handleAddExamination = () => {
@@ -65,7 +69,8 @@ const Examinations = () => {
                             <th className="px-4 py-2 text-left">Description</th>
                             <th className="px-4 py-2 text-left">Access From</th>
                             <th className="px-4 py-2 text-left">Access To</th>
-                            <th className="px-4 py-2 text-left">Actions</th>
+                            <th className="px-4 py-2 text-left">Start</th>
+                            <th className="px-4 py-2 text-left">Update</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -81,6 +86,14 @@ const Examinations = () => {
                                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
                                     >
                                         Start
+                                    </button>
+                                </td>
+                                <td className="px-4 py-2">
+                                    <button
+                                        onClick={() => handleUpdateExam(exam.ID)}
+                                        className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded ml-2"
+                                    >
+                                        Update Exam
                                     </button>
                                 </td>
                             </tr>
