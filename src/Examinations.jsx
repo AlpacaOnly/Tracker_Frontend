@@ -46,6 +46,29 @@ const Examinations = () => {
         navigate('/examination/add'); // Adjust the route as necessary
     };
 
+    const handleDeleteExam = async (examId) => {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`http://localhost:8080/api/tasks/delete/${examId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                console.log('Examination deleted successfully');
+                setExams(exams.filter(exam => exam.ID !== examId)); // Remove the deleted exam from the state
+            } else {
+                const errorMsg = await response.text();
+                throw new Error(errorMsg || 'Failed to delete examination');
+            }
+        } catch (error) {
+            console.error('Error deleting examination:', error);
+        }
+    };
+
     const formatDate = (isoString) => {
         const options = { year: 'numeric', month: 'long', day: 'numeric' }; // Options to display the date
         return new Date(isoString).toLocaleDateString('en-US', options);
@@ -53,7 +76,7 @@ const Examinations = () => {
 
     return (
         <div className="flex">
-            <Navbar/>
+            <Navbar />
             <div className="container mx-auto p-4">
                 <h1 className="text-xl font-bold text-white mb-4">Upcoming Examinations</h1>
                 <button
@@ -71,6 +94,7 @@ const Examinations = () => {
                             <th className="px-4 py-2 text-left">Access To</th>
                             <th className="px-4 py-2 text-left">Start</th>
                             <th className="px-4 py-2 text-left">Update</th>
+                            <th className="px-4 py-2 text-left">Delete</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,6 +118,14 @@ const Examinations = () => {
                                         className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded ml-2"
                                     >
                                         Update Exam
+                                    </button>
+                                </td>
+                                <td className="px-4 py-2">
+                                    <button
+                                        onClick={() => handleDeleteExam(exam.ID)}
+                                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded ml-2"
+                                    >
+                                        Delete Exam
                                     </button>
                                 </td>
                             </tr>

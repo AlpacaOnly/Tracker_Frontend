@@ -77,59 +77,59 @@ const AddExamination = () => {
             <Navbar />
             <div className="container mx-auto p-4 ">
                 <div class="flex items-center justify-center">
-                <h1 className="text-xl font-bold text-gray-800 mb-4">Add New Examination</h1>
+                <h1 className="text-xl font-bold text-white mb-4">Add New Examination</h1>
                 </div>
                 <form onSubmit={handleSubmit} className="max-w-xl m-auto">
                     <div className="mb-6">
-                        <label htmlFor="title" className="block text-gray-700 text-sm font-bold mb-2">Title:</label>
+                        <label htmlFor="title" className="block text-gray-100 text-sm font-bold mb-2">Title:</label>
                         <input
                             type="text"
                             id="title"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-100 leading-tight focus:outline-none focus:shadow-outline"
                             required
                         />
                     </div>
                     <div className="mb-6">
-                        <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-2">Description:</label>
+                        <label htmlFor="description" className="block text-gray-100 text-sm font-bold mb-2">Description:</label>
                         <textarea
                             id="description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-100 mb-3 leading-tight focus:outline-none focus:shadow-outline"
                             required
                         />
                     </div>
                     <div className="mb-6">
-                        <label htmlFor="accessFrom" className="block text-gray-700 text-sm font-bold mb-2">Access From</label>
+                        <label htmlFor="accessFrom" className="block text-gray-100 text-sm font-bold mb-2">Access From</label>
                         <input
                             type="datetime-local"
                             id="accessFrom"
                             value={accessFrom}
                             onChange={(e) => setAccessFrom(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-100 leading-tight focus:outline-none focus:shadow-outline"
                             required
                         />
                     </div>
                     <div className="mb-6">
-                        <label htmlFor="accessTo" className="block text-gray-700 text-sm font-bold mb-2">Access To</label>
+                        <label htmlFor="accessTo" className="block text-gray-100 text-sm font-bold mb-2">Access To</label>
                         <input
                             type="datetime-local"
                             id="accessTo"
                             value={accessTo}
                             onChange={(e) => setAccessTo(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-100 leading-tight focus:outline-none focus:shadow-outline"
                             required
                         />
                     </div>
                     <div className="mb-6">
-                        <label htmlFor="student" className="block text-gray-700 text-sm font-bold mb-2">Assign Student</label>
+                        <label htmlFor="student" className="block text-gray-100 text-sm font-bold mb-2">Assign Student</label>
                         <select
                             id="student"
                             value={selectedStudent}
                             onChange={(e) => setSelectedStudent(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-100 leading-tight focus:outline-none focus:shadow-outline"
                             required
                         >
                             <option value="">Select a student</option>
