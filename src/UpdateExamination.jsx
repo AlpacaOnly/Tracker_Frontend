@@ -105,7 +105,7 @@ const UpdateExamination = () => {
     };
 
     return (
-        <div className="flex">
+        <div className="flex h-[calc(100vh-2rem)]">
             <Navbar />
             <div className="container mx-auto p-4">
                 <div className="flex items-center justify-center">

@@ -6,10 +6,10 @@ const Examinations = () => {
     const [exams, setExams] = useState([]); // State to hold examination data
     const navigate = useNavigate();
     const ID = localStorage.getItem('ID');
+    const roleID = localStorage.getItem("roleID");
 
     useEffect(() => {
         // Fetch examination data from the API
-        console.log(ID);
         const fetchExaminations = async () => {
             try {
                 const token = localStorage.getItem('token'); // Get auth token from local storage

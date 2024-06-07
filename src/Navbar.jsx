@@ -5,7 +5,7 @@ const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className=" top-0 left-0 h-screen shadow-lg bg-gray-800 text-white w-64 space-y-6 py-7 px-2 z-10">
+        <div className="h-[calc(100vh-2rem)] top-0 left-0 shadow-lg bg-gray-800 text-white w-64 space-y-6 py-7 px-2 z-10">
             <div className="flex items-center justify-between px-4">
                 <a href="#" className="flex items-center">
                     <span className="font-semibold text-lg tracking-wide">Educational Portal</span>

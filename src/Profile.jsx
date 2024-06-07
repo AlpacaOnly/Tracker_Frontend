@@ -19,6 +19,7 @@ const Profile = () => {
                     const data = await response.json();
                     setUserData(data);
                     console.log("Profile Data:", data);  // Log the data to the console
+                    localStorage.setItem("roleID", data.RoleID)
                 } else {
                     throw new Error('Failed to fetch profile data');
                 }

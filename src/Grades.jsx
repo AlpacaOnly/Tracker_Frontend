@@ -14,9 +14,9 @@ const Grades = () => {
         <Navbar/>
     
         <div className="container mx-auto p-4">
-            <h1 className="text-xl font-bold text-gray-800 mb-4">Grades Overview</h1>
+            <h1 className="text-xl font-bold text-white mb-4">Grades Overview</h1>
             <table className="min-w-full table-auto">
-                <thead className="bg-gray-100">
+                <thead className="bg-gray-800">
                     <tr>
                         <th className="px-4 py-2 text-left">Subject</th>
                         <th className="px-4 py-2 text-left">Grade</th>
@@ -25,7 +25,7 @@ const Grades = () => {
                 </thead>
                 <tbody>
                     {gradesData.map((grade) => (
-                        <tr key={grade.id} className="bg-white border-b">
+                        <tr key={grade.id} className="bg-gray-700 border-b">
                             <td className="px-4 py-2">{grade.subject}</td>
                             <td className="px-4 py-2">{grade.grade}</td>
                             <td className="px-4 py-2">{grade.credits}</td>
