@@ -11,10 +11,12 @@ const ExamDetailPage = () => {
     const [submissionMessage, setSubmissionMessage] = useState("");
     const [ws, setWs] = useState(null);
     const [solution, setSolution] = useState("");
+    const [loadingError, setLoadingError] = useState("");
 
     const ID = localStorage.getItem("id");
     const { examid } = useParams();
     const [exam, setExam] = useState(null);
+    const [studentTaskId, setStudentTaskId] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -28,17 +30,18 @@ const ExamDetailPage = () => {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    const matchedExam = data.find(exam => exam.ID === parseInt(examid));
-                    setExam(matchedExam);
-                    if (matchedExam) {
-                        const studenttaskid = matchedExam.ID;
-                        localStorage.setItem("studenttaskid", studenttaskid);
-                    }
+                    console.log('Fetched data:', data);
+                    
+                    console.log('Exam ID:', examid);
+                    setStudentTaskId(examid);
+    
+                        setExam(data[0])
+                    
                 } else {
-                    console.error('Failed to fetch examinations:', response.statusText);
+                    setLoadingError('Failed to fetch examinations: ' + response.statusText);
                 }
             } catch (error) {
-                console.error('Error fetching examinations:', error);
+                setLoadingError('Error fetching examinations: ' + error.message);
             }
         };
 
@@ -49,6 +52,9 @@ const ExamDetailPage = () => {
         webSocket.onopen = () => {
             console.log('WebSocket Connected');
             setWs(webSocket);
+        };
+        webSocket.onerror = (error) => {
+            console.error('WebSocket Error:', error);
         };
         webSocket.onclose = () => {
             console.log('WebSocket Disconnected');
@@ -65,17 +71,11 @@ const ExamDetailPage = () => {
         };
     }, [ID, examid, intervalId]);
 
-    const studenttaskid = localStorage.getItem("studenttaskid");
-
     const handleStartExam = () => {
         if (ws && ws.readyState === WebSocket.OPEN) {
             setExamStarted(true);
-            console.log(JSON.stringify({
-                StudentTaskID: studenttaskid,
-                Message: "start"
-            }))
             ws.send(JSON.stringify({
-                StudentTaskID: parseInt(studenttaskid),
+                StudentTaskID: parseInt(studentTaskId),
                 Message: "start"
             }));
             const id = setInterval(() => {
@@ -97,7 +97,7 @@ const ExamDetailPage = () => {
     const handleEndExam = async () => {
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({
-                StudentTaskID: parseInt(studenttaskid),
+                StudentTaskID: parseInt(studentTaskId),
                 Message: "stop"
             }));
         }
@@ -105,21 +105,17 @@ const ExamDetailPage = () => {
         setExamStarted(false);
 
         try {
-            console.log("solution is", solution)
             const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:8080/api/solutions/on-student-task/${studenttaskid}`, {
+            const response = await fetch(`http://localhost:8080/api/solutions/on-student-task/${studentTaskId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    solution
-                })
+                body: JSON.stringify({ solution })
             });
             if (response.ok) {
                 setSubmissionMessage("Your exam has been submitted and is pending review by a teacher. You will see your grade on the Grades page.");
-                console.log("Task Submitted:", solution);
                 setSolution("");
             } else {
                 const errorMsg = await response.text();
@@ -139,7 +135,7 @@ const ExamDetailPage = () => {
     };
 
     if (!exam) {
-        return <p>Loading exam details...</p>;
+        return loadingError ? <p>{loadingError}</p> : <p>Loading exam details...</p>;
     }
 
     return (
@@ -159,9 +155,12 @@ const ExamDetailPage = () => {
                 ) : (
                     <>
                         {!examStarted ? (
-                            <button onClick={handleStartExam} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Start Exam
-                            </button>
+                            <div>
+                                <button onClick={handleStartExam} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                    Start Exam
+                                </button>
+                                {submissionMessage && <p className="text-red-500">{submissionMessage}</p>}
+                            </div>
                         ) : (
                             <div>
                                 <p className="text-red-500 font-bold">Time remaining: {formatTime(timer)}</p>

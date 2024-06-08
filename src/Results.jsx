@@ -6,33 +6,33 @@ const Results = () => {
     const [students, setStudents] = useState([]);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchStudents = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                navigate('/login'); // Redirect if no token is found
-                return;
-            }
-            try {
-                const response = await fetch('http://localhost:8080/api/results', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setStudents(data); // Assuming 'data' is an array of student objects who passed the exams
-                } else {
-                    throw new Error('Failed to fetch students');
-                }
-            } catch (error) {
-                console.error('Error fetching students:', error);
-            }
-        };
+    // useEffect(() => {
+        // const fetchStudents = async () => {
+        //     const token = localStorage.getItem('token');
+        //     if (!token) {
+        //         navigate('/login'); // Redirect if no token is found
+        //         return;
+        //     }
+        //     try {
+        //         const response = await fetch('http://localhost:8080/api/results', {
+        //             headers: {
+        //                 'Authorization': `Bearer ${token}`,
+        //                 'Content-Type': 'application/json'
+        //             }
+        //         });
+        //         if (response.ok) {
+        //             const data = await response.json();
+        //             setStudents(data); // Assuming 'data' is an array of student objects who passed the exams
+        //         } else {
+        //             throw new Error('Failed to fetch students');
+        //         }
+        //     } catch (error) {
+        //         console.error('Error fetching students:', error);
+        //     }
+        // };
 
-        fetchStudents();
-    }, [navigate]);
+        // fetchStudents();
+    // }, [navigate]);
 
     const handleGrades = (studentId) => {
         navigate(`/grades/${studentId}`);
