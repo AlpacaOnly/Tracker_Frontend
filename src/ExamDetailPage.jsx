@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Navbar from './Navbar';
 import CodeEditor from './MonacoEditor/components/CodeEditor';
 import { Box } from '@chakra-ui/react';
@@ -12,15 +12,16 @@ const ExamDetailPage = () => {
     const [submissionMessage, setSubmissionMessage] = useState("");
     const [ws, setWs] = useState(null);
 
-    const ID = localStorage.getItem("ID");
+    const ID = localStorage.getItem("id");
     const roleID = localStorage.getItem("roleID");
-    const [exam, setExam] = useState([]);
+    const { examid } = useParams();
+    const [exam, setExam] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
         const fetchExaminations = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/tasks/teacher/${ID}`, {
+                const response = await fetch(`http://localhost:8080/api/tasks/student/${ID}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -28,7 +29,12 @@ const ExamDetailPage = () => {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    setExam(data);
+                    const matchedExam = data.find(exam => exam.ID === parseInt(examid));
+                    setExam(matchedExam);
+                    if (matchedExam) {
+                        const studenttaskid = matchedExam.ID;
+                        localStorage.setItem("studenttaskid", studenttaskid);
+                    }
                 } else {
                     console.error('Failed to fetch examinations:', response.statusText);
                 }
@@ -57,12 +63,17 @@ const ExamDetailPage = () => {
                 clearInterval(intervalId);
             }
         };
-    }, [ID, intervalId]);
+    }, [ID, examid, intervalId]);
+
+    const studenttaskid = localStorage.getItem("studenttaskid");
 
     const handleStartExam = () => {
         setExamStarted(true);
         if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send('start');
+            ws.send(JSON.stringify({
+                StudentTaskID: studenttaskid,
+                Message: "start"
+            }));
         }
         const id = setInterval(() => {
             setTimer((prevTimer) => {
@@ -93,44 +104,42 @@ const ExamDetailPage = () => {
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
+    if (!exam) {
+        return <p>Loading exam details...</p>;
+    }
+
     return (
         <div className="flex">
             <Navbar />
             <div className="container mx-auto p-4">
-                {exam.length > 0 ? (
-                    <>
-                        <h1 className="text-2xl font-bold text-white">{exam[0].Title} Exam</h1>
-                        <p><strong>Date:</strong> {exam[0].AccessFrom}</p>
-                        <p><strong>Time:</strong> {exam[0].AccessTo}</p>
-                        <p><strong>Description:</strong> {exam[0].Description}</p>
+                <h1 className="text-2xl font-bold text-white">{exam.Task.Title} Exam</h1>
+                <p><strong>Date:</strong> {exam.Task.AccessFrom}</p>
+                <p><strong>Time:</strong> {exam.Task.AccessTo}</p>
+                <p><strong>Description:</strong> {exam.Task.Description}</p>
 
-                        {submissionMessage ? (
-                            <div>
-                                <p className="text-green-500">{submissionMessage}</p>
-                                <Link to="/grades" className="text-blue-500 hover:text-blue-700">View Grades</Link>
-                            </div>
+                {submissionMessage ? (
+                    <div>
+                        <p className="text-green-500">{submissionMessage}</p>
+                        <Link to="/grades" className="text-blue-500 hover:text-blue-700">View Grades</Link>
+                    </div>
+                ) : (
+                    <>
+                        {!examStarted ? (
+                            <button onClick={handleStartExam} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                Start Exam
+                            </button>
                         ) : (
-                            <>
-                                {!examStarted ? (
-                                    <button onClick={handleStartExam} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                        Start Exam
-                                    </button>
-                                ) : (
-                                    <div>
-                                        <p className="text-red-500 font-bold">Time remaining: {formatTime(timer)}</p>
-                                        <Box minH="100vh" bg="#0f0a19" color="gray.500" px={6} py={8}>
-                                            <CodeEditor />
-                                        </Box>
-                                        <button onClick={handleEndExam} className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                                            Submit Exam
-                                        </button>
-                                    </div>
-                                )}
-                            </>
+                            <div>
+                                <p className="text-red-500 font-bold">Time remaining: {formatTime(timer)}</p>
+                                <Box minH="100vh" bg="#0f0a19" color="gray.500" px={6} py={8}>
+                                    <CodeEditor />
+                                </Box>
+                                <button onClick={handleEndExam} className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                    Submit Exam
+                                </button>
+                            </div>
                         )}
                     </>
-                ) : (
-                    <p>Loading exam details...</p>
                 )}
             </div>
         </div>

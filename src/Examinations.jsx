@@ -11,7 +11,6 @@ const Examinations = () => {
 
     useEffect(() => {
         const token = localStorage.getItem('token'); // Get auth token from local storage
-
         const fetchStudentExaminations = async () => {
             try {
                 const response = await fetch(`http://localhost:8080/api/tasks/student/${ID}`, {
@@ -25,6 +24,7 @@ const Examinations = () => {
                     const data = await response.json();
                     console.log('Fetched student data:', data);
                     setStudentExams(data); // Update state with fetched examination data
+                    console.log("student exams", data)
                 } else {
                     console.error('Failed to fetch student examinations:', response.statusText);
                 }
@@ -96,6 +96,10 @@ const Examinations = () => {
         }
     };
 
+    const handleViewSolutions = (exam) => {
+        navigate(`/exam/${exam.ID}/solutions`);
+    };
+
     const formatDate = (isoString) => {
         const options = { year: 'numeric', month: 'long', day: 'numeric' }; // Options to display the date
         return new Date(isoString).toLocaleDateString('en-US', options);
@@ -132,7 +136,7 @@ const Examinations = () => {
                     ))
                 ) : (
                     <tr>
-                        <td colSpan="5" className="text-center py-4">
+                        <td colSpan="6" className="text-center py-4">
                             No examinations available.
                         </td>
                     </tr>
@@ -152,6 +156,7 @@ const Examinations = () => {
                     <th className="px-4 py-2 text-left">Start</th>
                     <th className="px-4 py-2 text-left">Update</th>
                     <th className="px-4 py-2 text-left">Delete</th>
+                    <th className="px-4 py-2 text-left">Solutions</th>
                 </tr>
             </thead>
             <tbody>
@@ -186,11 +191,19 @@ const Examinations = () => {
                                     Delete Exam
                                 </button>
                             </td>
+                            <td className="px-4 py-2">
+                                <button
+                                    onClick={() => handleViewSolutions(exam)}
+                                    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded"
+                                >
+                                    View Solutions
+                                </button>
+                            </td>
                         </tr>
                     ))
                 ) : (
                     <tr>
-                        <td colSpan="7" className="text-center py-4">
+                        <td colSpan="8" className="text-center py-4">
                             No examinations available.
                         </td>
                     </tr>
