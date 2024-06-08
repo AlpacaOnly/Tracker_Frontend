@@ -20,6 +20,7 @@ const Profile = () => {
                     setUserData(data);
                     console.log("Profile Data:", data);  // Log the data to the console
                     localStorage.setItem("roleID", data.RoleID)
+                    localStorage.setItem("id", data.ID)
                 } else {
                     throw new Error('Failed to fetch profile data');
                 }

@@ -3,12 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 
 const Examinations = () => {
-    const [exams, setExams] = useState([]); // State to hold examination data
+    const [studentExams, setStudentExams] = useState([]); // State to hold student examination data
+    const [teacherExams, setTeacherExams] = useState([]); // State to hold teacher examination data
     const navigate = useNavigate();
-    const ID = localStorage.getItem('ID');
-    console.log("ID is", ID)
+    const ID = localStorage.getItem('id');
     const roleID = localStorage.getItem('roleID');
-    console.log("roleID is", roleID)
 
     useEffect(() => {
         const token = localStorage.getItem('token'); // Get auth token from local storage
@@ -25,7 +24,7 @@ const Examinations = () => {
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Fetched student data:', data);
-                    setExams(data); // Update state with fetched examination data
+                    setStudentExams(data); // Update state with fetched examination data
                 } else {
                     console.error('Failed to fetch student examinations:', response.statusText);
                 }
@@ -46,9 +45,7 @@ const Examinations = () => {
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Fetched teacher data:', data);
-                    const taskID = localStorage.setItem("taskID", data.id)
-                    console.log("TASK ID IS", taskID)
-                    setExams(data); // Update state with fetched examination data
+                    setTeacherExams(data); // Update state with fetched examination data
                 } else {
                     console.error('Failed to fetch teacher examinations:', response.statusText);
                 }
@@ -89,7 +86,7 @@ const Examinations = () => {
 
             if (response.ok) {
                 console.log('Examination deleted successfully');
-                setExams(exams.filter(exam => exam.ID !== examId)); // Remove the deleted exam from the state
+                setTeacherExams(teacherExams.filter(exam => exam.ID !== examId)); // Remove the deleted exam from the state
             } else {
                 const errorMsg = await response.text();
                 throw new Error(errorMsg || 'Failed to delete examination');
@@ -104,6 +101,104 @@ const Examinations = () => {
         return new Date(isoString).toLocaleDateString('en-US', options);
     };
 
+    const renderStudentTable = () => (
+        <table className="min-w-full table-auto">
+            <thead className="bg-gray-800">
+                <tr>
+                    <th className="px-4 py-2 text-left">Title</th>
+                    <th className="px-4 py-2 text-left">Description</th>
+                    <th className="px-4 py-2 text-left">Access From</th>
+                    <th className="px-4 py-2 text-left">Access To</th>
+                    <th className="px-4 py-2 text-left">Start</th>
+                </tr>
+            </thead>
+            <tbody>
+                {studentExams.length > 0 ? (
+                    studentExams.map((examWrapper) => (
+                        <tr key={examWrapper.Task.ID} className="bg-gray-700 border-b">
+                            <td className="px-4 py-2">{examWrapper.Task.Title}</td>
+                            <td className="px-4 py-2">{examWrapper.Task.Description}</td>
+                            <td className="px-4 py-2">{formatDate(examWrapper.Task.AccessFrom)}</td>
+                            <td className="px-4 py-2">{formatDate(examWrapper.Task.AccessTo)}</td>
+                            <td className="px-4 py-2">
+                                <button
+                                    onClick={() => handleStartExam(examWrapper.Task)}
+                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                                >
+                                    Start
+                                </button>
+                            </td>
+                        </tr>
+                    ))
+                ) : (
+                    <tr>
+                        <td colSpan="5" className="text-center py-4">
+                            No examinations available.
+                        </td>
+                    </tr>
+                )}
+            </tbody>
+        </table>
+    );
+
+    const renderTeacherTable = () => (
+        <table className="min-w-full table-auto">
+            <thead className="bg-gray-800">
+                <tr>
+                    <th className="px-4 py-2 text-left">Title</th>
+                    <th className="px-4 py-2 text-left">Description</th>
+                    <th className="px-4 py-2 text-left">Access From</th>
+                    <th className="px-4 py-2 text-left">Access To</th>
+                    <th className="px-4 py-2 text-left">Start</th>
+                    <th className="px-4 py-2 text-left">Update</th>
+                    <th className="px-4 py-2 text-left">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {teacherExams.length > 0 ? (
+                    teacherExams.map((exam) => (
+                        <tr key={exam.ID} className="bg-gray-700 border-b">
+                            <td className="px-4 py-2">{exam.Title}</td>
+                            <td className="px-4 py-2">{exam.Description}</td>
+                            <td className="px-4 py-2">{formatDate(exam.AccessFrom)}</td>
+                            <td className="px-4 py-2">{formatDate(exam.AccessTo)}</td>
+                            <td className="px-4 py-2">
+                                <button
+                                    onClick={() => handleStartExam(exam)}
+                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                                >
+                                    Start
+                                </button>
+                            </td>
+                            <td className="px-4 py-2">
+                                <button
+                                    onClick={() => handleUpdateExam(exam.ID)}
+                                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded ml-2"
+                                >
+                                    Update Exam
+                                </button>
+                            </td>
+                            <td className="px-4 py-2">
+                                <button
+                                    onClick={() => handleDeleteExam(exam.ID)}
+                                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded ml-2"
+                                >
+                                    Delete Exam
+                                </button>
+                            </td>
+                        </tr>
+                    ))
+                ) : (
+                    <tr>
+                        <td colSpan="7" className="text-center py-4">
+                            No examinations available.
+                        </td>
+                    </tr>
+                )}
+            </tbody>
+        </table>
+    );
+
     return (
         <div className="flex">
             <Navbar />
@@ -117,61 +212,7 @@ const Examinations = () => {
                         Add Examination
                     </button>
                 )}
-                <table className="min-w-full table-auto">
-                    <thead className="bg-gray-800">
-                        <tr>
-                            <th className="px-4 py-2 text-left">Title</th>
-                            <th className="px-4 py-2 text-left">Description</th>
-                            <th className="px-4 py-2 text-left">Access From</th>
-                            <th className="px-4 py-2 text-left">Access To</th>
-                            <th className="px-4 py-2 text-left">Start</th>
-                            <th className="px-4 py-2 text-left">Update</th>
-                            <th className="px-4 py-2 text-left">Delete</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {exams.length > 0 ? (
-                            exams.map((exam) => (
-                                <tr key={exam.ID} className="bg-gray-700 border-b">
-                                    <td className="px-4 py-2">{exam.Title}</td>
-                                    <td className="px-4 py-2">{exam.Description}</td>
-                                    <td className="px-4 py-2">{formatDate(exam.AccessFrom)}</td>
-                                    <td className="px-4 py-2">{formatDate(exam.AccessTo)}</td>
-                                    <td className="px-4 py-2">
-                                        <button
-                                            onClick={() => handleStartExam(exam)}
-                                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
-                                        >
-                                            Start
-                                        </button>
-                                    </td>
-                                    <td className="px-4 py-2">
-                                        <button
-                                            onClick={() => handleUpdateExam(exam.ID)}
-                                            className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded ml-2"
-                                        >
-                                            Update Exam
-                                        </button>
-                                    </td>
-                                    <td className="px-4 py-2">
-                                        <button
-                                            onClick={() => handleDeleteExam(exam.ID)}
-                                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded ml-2"
-                                        >
-                                            Delete Exam
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="7" className="text-center py-4">
-                                    No examinations available.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                {roleID === '1' ? renderStudentTable() : renderTeacherTable()}
             </div>
         </div>
     );
