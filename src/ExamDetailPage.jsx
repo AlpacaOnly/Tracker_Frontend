@@ -6,14 +6,13 @@ import { Box } from '@chakra-ui/react';
 
 const ExamDetailPage = () => {
     const [examStarted, setExamStarted] = useState(false);
-    const [taskDescription, setTaskDescription] = useState("");
     const [timer, setTimer] = useState(1800); // 30 minutes for the timer
     const [intervalId, setIntervalId] = useState(null);
     const [submissionMessage, setSubmissionMessage] = useState("");
     const [ws, setWs] = useState(null);
+    const [solution, setSolution] = useState("");
 
     const ID = localStorage.getItem("id");
-    const roleID = localStorage.getItem("roleID");
     const { examid } = useParams();
     const [exam, setExam] = useState(null);
 
@@ -49,11 +48,12 @@ const ExamDetailPage = () => {
         const webSocket = new WebSocket('ws://localhost:8001');
         webSocket.onopen = () => {
             console.log('WebSocket Connected');
+            setWs(webSocket);
         };
         webSocket.onclose = () => {
             console.log('WebSocket Disconnected');
+            setWs(null);
         };
-        setWs(webSocket);
 
         return () => {
             if (webSocket) {
@@ -68,34 +68,68 @@ const ExamDetailPage = () => {
     const studenttaskid = localStorage.getItem("studenttaskid");
 
     const handleStartExam = () => {
-        setExamStarted(true);
         if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({
+            setExamStarted(true);
+            console.log(JSON.stringify({
                 StudentTaskID: studenttaskid,
                 Message: "start"
+            }))
+            ws.send(JSON.stringify({
+                StudentTaskID: parseInt(studenttaskid),
+                Message: "start"
             }));
+            const id = setInterval(() => {
+                setTimer((prevTimer) => {
+                    if (prevTimer <= 1) {
+                        clearInterval(id);
+                        handleEndExam();
+                    }
+                    return prevTimer - 1;
+                });
+            }, 1000);
+            setIntervalId(id);
+        } else {
+            setSubmissionMessage("Cannot start exam. Please start the Keylogger.");
+            console.error('WebSocket is not connected. Cannot start exam.');
         }
-        const id = setInterval(() => {
-            setTimer((prevTimer) => {
-                if (prevTimer <= 1) {
-                    clearInterval(id);
-                    handleEndExam();
-                }
-                return prevTimer - 1;
-            });
-        }, 1000);
-        setIntervalId(id);
     };
 
-    const handleEndExam = () => {
+    const handleEndExam = async () => {
         if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send('stop');
+            ws.send(JSON.stringify({
+                StudentTaskID: parseInt(studenttaskid),
+                Message: "stop"
+            }));
         }
         clearInterval(intervalId);
         setExamStarted(false);
-        setSubmissionMessage("Your exam has been submitted and is pending review by a teacher. You will see your grade on the Grades page.");
-        console.log("Task Submitted:", taskDescription);
-        setTaskDescription("");
+
+        try {
+            console.log("solution is", solution)
+            const token = localStorage.getItem("token");
+            const response = await fetch(`http://localhost:8080/api/solutions/on-student-task/${studenttaskid}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    solution
+                })
+            });
+            if (response.ok) {
+                setSubmissionMessage("Your exam has been submitted and is pending review by a teacher. You will see your grade on the Grades page.");
+                console.log("Task Submitted:", solution);
+                setSolution("");
+            } else {
+                const errorMsg = await response.text();
+                console.error('Failed to submit solution:', errorMsg);
+                setSubmissionMessage("Failed to submit your exam. Please try again.");
+            }
+        } catch (error) {
+            console.error('Error submitting solution:', error);
+            setSubmissionMessage("An error occurred while submitting your exam. Please try again.");
+        }
     };
 
     const formatTime = (totalSeconds) => {
@@ -132,7 +166,7 @@ const ExamDetailPage = () => {
                             <div>
                                 <p className="text-red-500 font-bold">Time remaining: {formatTime(timer)}</p>
                                 <Box minH="100vh" bg="#0f0a19" color="gray.500" px={6} py={8}>
-                                    <CodeEditor />
+                                    <CodeEditor onChange={(value) => setSolution(value)} />
                                 </Box>
                                 <button onClick={handleEndExam} className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                                     Submit Exam

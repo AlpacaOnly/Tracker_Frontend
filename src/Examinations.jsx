@@ -22,9 +22,7 @@ const Examinations = () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Fetched student data:', data);
                     setStudentExams(data); // Update state with fetched examination data
-                    console.log("student exams", data)
                 } else {
                     console.error('Failed to fetch student examinations:', response.statusText);
                 }
@@ -44,7 +42,6 @@ const Examinations = () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Fetched teacher data:', data);
                     setTeacherExams(data); // Update state with fetched examination data
                 } else {
                     console.error('Failed to fetch teacher examinations:', response.statusText);
@@ -85,7 +82,6 @@ const Examinations = () => {
             });
 
             if (response.ok) {
-                console.log('Examination deleted successfully');
                 setTeacherExams(teacherExams.filter(exam => exam.ID !== examId)); // Remove the deleted exam from the state
             } else {
                 const errorMsg = await response.text();

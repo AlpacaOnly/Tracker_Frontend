@@ -41,7 +41,7 @@ const AddExamination = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        console.log('Selected student ID:', selectedStudent); // Log the selected student value
+        // console.log('Selected student ID:', selectedStudent); // Log the selected student value
         const token = localStorage.getItem('token');
         const body = JSON.stringify({
             Title: title,
@@ -62,7 +62,7 @@ const AddExamination = () => {
 
             if (response.ok) {
                 const taskData = await response.json();
-                console.log('Examination added successfully', taskData);
+                // console.log('Examination added successfully', taskData);
                 
                 // Assign student to the created task
                 await assignStudentToTask(taskData.ID, selectedStudent, token);

@@ -5,7 +5,7 @@ import LanguageSelector from "./LanguageSelector";
 import { CODE_SNIPPETS } from "../constants";
 import Output from "./Output";
 
-const CodeEditor = () => {
+const CodeEditor = ({ onChange }) => {
   const editorRef = useRef();
   const [value, setValue] = useState("");
   const [language, setLanguage] = useState("javascript");
@@ -18,6 +18,13 @@ const CodeEditor = () => {
   const onSelect = (language) => {
     setLanguage(language);
     setValue(CODE_SNIPPETS[language]);
+  };
+
+  const handleEditorChange = (value) => {
+    setValue(value);
+    if (onChange) {
+      onChange(value);
+    }
   };
 
   return (
@@ -37,7 +44,7 @@ const CodeEditor = () => {
             defaultValue={CODE_SNIPPETS[language]}
             onMount={onMount}
             value={value}
-            onChange={(value) => setValue(value)}
+            onChange={handleEditorChange}
           />
         </Box>
         <Output editorRef={editorRef} language={language} />

@@ -20,12 +20,6 @@ const Login = () => {
             if (response.ok) {
                 const data = await response.json();
                 console.log('Login successful:', data);
-                // Store the token, if your backend sends one
-                console.log(response)
-                // const decodedToken = jwtDecode(data.token);
-                // const userID = decodedToken.UserID;
-                // const id = localStorage.setItem("id", userID)
-                // console.log("id",id)
                 localStorage.setItem('token', data.token); // Assume the token is in data.token
                 navigate("/home"); // Redirects user to the Home page after login
             } else {
