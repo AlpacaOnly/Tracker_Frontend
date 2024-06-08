@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const roleID = localStorage.getItem("roleID")
 
     return (
         <div className="h-[calc(100vh-2rem)] top-0 left-0 shadow-lg bg-gray-800 text-white w-64 space-y-6 py-7 px-2 z-10">
@@ -19,8 +20,9 @@ const Navbar = () => {
             <nav>
                 <Link to="/profile" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Profile</Link>
                 <Link to="/grades" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Grades</Link>
-                <Link to="/assignments" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Assignments</Link>
+                {/* <Link to="/assignments" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Assignments</Link> */}
                 <Link to="/examinations" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Examinations</Link>
+                <Link to="/results" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Results</Link>
             </nav>
         </div>
     );

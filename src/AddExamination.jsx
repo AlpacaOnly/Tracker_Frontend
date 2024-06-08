@@ -41,13 +41,13 @@ const AddExamination = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        console.log('Selected student ID:', selectedStudent); // Log the selected student value
         const token = localStorage.getItem('token');
         const body = JSON.stringify({
             Title: title,
             Description: description,
             AccessFrom: new Date(accessFrom).toISOString(),
             AccessTo: new Date(accessTo).toISOString(),
-            StudentID: selectedStudent
         });
 
         try {
@@ -61,7 +61,12 @@ const AddExamination = () => {
             });
 
             if (response.ok) {
-                console.log('Examination added successfully');
+                const taskData = await response.json();
+                console.log('Examination added successfully', taskData);
+                
+                // Assign student to the created task
+                await assignStudentToTask(taskData.ID, selectedStudent, token);
+
                 navigate('/examinations');
             } else {
                 const errorMsg = await response.text();
@@ -72,12 +77,33 @@ const AddExamination = () => {
         }
     };
 
+    const assignStudentToTask = async (taskId, studentId, token) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/tasks/${taskId}/students/${studentId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                console.log('Student assigned to task successfully');
+            } else {
+                const errorMsg = await response.text();
+                throw new Error(errorMsg || 'Failed to assign student to task');
+            }
+        } catch (error) {
+            console.error('Error assigning student to task:', error);
+        }
+    };
+
     return (
         <div className="flex">
             <Navbar />
-            <div className="container mx-auto p-4 ">
-                <div class="flex items-center justify-center">
-                <h1 className="text-xl font-bold text-white mb-4">Add New Examination</h1>
+            <div className="container mx-auto p-4">
+                <div className="flex items-center justify-center">
+                    <h1 className="text-xl font-bold text-white mb-4">Add New Examination</h1>
                 </div>
                 <form onSubmit={handleSubmit} className="max-w-xl m-auto">
                     <div className="mb-6">

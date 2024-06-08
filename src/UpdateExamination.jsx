@@ -72,6 +72,11 @@ const UpdateExamination = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        if (!selectedStudent) {
+            console.error('No student selected');
+            return;
+        }
+
         const token = localStorage.getItem('token');
         const body = JSON.stringify({
             Title: title,
@@ -81,8 +86,7 @@ const UpdateExamination = () => {
             TeacherID: parseInt(ID)
         });
 
-        try {   
-            console.log(body)
+        try {
             const response = await fetch(`http://localhost:8080/api/tasks/update/${examid}`, {
                 method: 'PUT',
                 headers: {
@@ -94,7 +98,23 @@ const UpdateExamination = () => {
 
             if (response.ok) {
                 console.log('Examination updated successfully');
-                navigate('/examinations');
+
+                // Assign the student to the task
+                const assignResponse = await fetch(`http://localhost:8080/api/users/${selectedStudent}/add-to-task/${examid}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (assignResponse.ok) {
+                    console.log('Student assigned to the task successfully');
+                    navigate('/examinations');
+                } else {
+                    const errorMsg = await assignResponse.text();
+                    throw new Error(errorMsg || 'Failed to assign student to the task');
+                }
             } else {
                 const errorMsg = await response.text();
                 throw new Error(errorMsg || 'Failed to update examination');

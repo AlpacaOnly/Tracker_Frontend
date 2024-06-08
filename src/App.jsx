@@ -11,6 +11,7 @@ import ExamDetailPage from "./ExamDetailPage";
 import AddExamination from "./AddExamination";
 import UpdateExamination from "./UpdateExamination";
 import { useEffect } from "react";
+import Results from "./Results";
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="grades" element={<Grades />} />
           <Route path="assignments" element={<Assignments />} />
           <Route path="examinations" element={<Examinations />} />
+          <Route path="results" element={<Results />} />
           <Route path="/exam/:examid" element={<ExamDetailPage />} />
           <Route path="examination/add" element={<AddExamination />} />
           <Route path="examination/update/:examid" element={<UpdateExamination />} />
