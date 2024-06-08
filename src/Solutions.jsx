@@ -58,23 +58,31 @@ const Solutions = () => {
                 <table className="min-w-full table-auto">
                     <thead className="bg-gray-800">
                         <tr>
+                            <th className="px-4 py-2 text-left">ID</th>
                             <th className="px-4 py-2 text-left">Student ID</th>
                             <th className="px-4 py-2 text-left">Solution</th>
+                            <th className="px-4 py-2 text-left">Report ID</th>
+                            <th className="px-4 py-2 text-left">Time Start</th>
+                            <th className="px-4 py-2 text-left">Time End</th>
                         </tr>
                     </thead>
                     <tbody>
                         {solutions.length > 0 ? (
                             solutions.map((solution, index) => (
                                 <tr key={index} className="bg-gray-700 border-b">
-                                    <td className="px-4 py-2">{solution.studentTask && solution.studentTask.student ? solution.studentTask.student.id : 'N/A'}</td>
+                                    <td className="px-4 py-2">{solution.ID}</td>
+                                    <td className="px-4 py-2">{solution.StudentTask ? solution.StudentTask.student?.id || 'N/A' : 'N/A'}</td>
                                     <td className="px-4 py-2">
-                                        <pre>{solution.solution}</pre>
+                                        <pre>{solution.Solution || 'No solution provided'}</pre>
                                     </td>
+                                    <td className="px-4 py-2">{solution.ReportID}</td>
+                                    <td className="px-4 py-2">{solution.TimeStart}</td>
+                                    <td className="px-4 py-2">{solution.TimeEnd}</td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="2" className="text-center py-4">
+                                <td colSpan="6" className="text-center py-4">
                                     No solutions available.
                                 </td>
                             </tr>
