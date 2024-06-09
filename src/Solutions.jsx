@@ -17,7 +17,7 @@ const Solutions = () => {
             try {
                 // Simulating a delay
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                
+
                 const response = await fetch(`http://localhost:8080/api/solutions/solved-task/${examid}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -83,6 +83,7 @@ const Solutions = () => {
             ...prevState,
             [solutionId]: cheatingRate
         }));
+        console.log(`Updated CheatingRate for solution ${solutionId} to ${cheatingRate}`); // Log to verify the update
     };
 
     const handleGradeChange = (solutionId, grade) => {
