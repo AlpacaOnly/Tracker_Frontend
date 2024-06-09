@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { okaidia } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Navbar from './Navbar';
 
 const Solutions = () => {
@@ -29,7 +31,6 @@ const Solutions = () => {
                     const data = await response.json();
                     console.log(data); // Log the data to inspect its structure
                     setSolutions(data || []); // Update state with fetched solutions data, ensure it is an array
-                    console.log("solutions", solutions)
                     // Initialize grades and cheating rates state with default values
                     const initialGrades = {};
                     const initialCheatingRates = {};
@@ -192,7 +193,11 @@ const Solutions = () => {
                             solutions.map((solution, index) => (
                                 <tr key={index} className="bg-gray-700 border-b">
                                     <td className="px-4 py-2">{solution.ReportID}</td>
-                                    <td className="px-4 py-2">{solution.Solution}</td>
+                                    <td className="px-4 py-2">
+                                        <SyntaxHighlighter language="javascript" style={okaidia}>
+                                            {solution.Solution}
+                                        </SyntaxHighlighter>
+                                    </td>
                                     <td className="px-4 py-2">
                                         <input 
                                             type="number" 
