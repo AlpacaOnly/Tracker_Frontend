@@ -35,7 +35,7 @@ const Solutions = () => {
                     const initialCheatingRates = {};
                     data.forEach(solution => {
                         initialGrades[solution.ID] = solution.finalGrade || 0;
-                        initialCheatingRates[solution.ID] = solution.CheatingRate || 'N/A';
+                        initialCheatingRates[solution.ID] = 0; // Initialize cheating rate to 0
                     });
                     setGrades(initialGrades);
                     setCheatingRates(initialCheatingRates);
@@ -168,7 +168,7 @@ const Solutions = () => {
                                         />
                                     </td>
                                     <td className="px-4 py-2">
-                                        {cheatingRates[solution.ID] !== undefined ? cheatingRates[solution.ID] : 'N/A'}
+                                        {cheatingRates[solution.ID] !== undefined ? cheatingRates[solution.ID] : 0}
                                     </td>
                                     <td className="px-4 py-2">
                                         <button 
