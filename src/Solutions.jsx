@@ -30,7 +30,7 @@ const Solutions = () => {
                     console.log(data); // Log the data to inspect its structure
                     setSolutions(data || []); // Update state with fetched solutions data, ensure it is an array
 
-                    // Initialize grades state with default values
+                    // Initialize grades and cheating rates state with default values
                     const initialGrades = {};
                     const initialCheatingRates = {};
                     data.forEach(solution => {
@@ -181,7 +181,7 @@ const Solutions = () => {
                                             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
                                             onClick={() => handleGenerateReport(solution.ID)}
                                         >
-                                            Generate Report
+                                            Generate Cheating Rate
                                         </button>
                                     </td>
                                 </tr>
