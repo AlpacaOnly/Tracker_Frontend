@@ -15,7 +15,10 @@ const Solutions = () => {
 
         const fetchSolutions = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/solutions/by-student/${examid}`, {
+                // Simulating a delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                const response = await fetch(`http://localhost:8080/api/solutions/solved-task/${examid}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -26,13 +29,13 @@ const Solutions = () => {
                     const data = await response.json();
                     console.log(data); // Log the data to inspect its structure
                     setSolutions(data || []); // Update state with fetched solutions data, ensure it is an array
-
+                    console.log("solutions", solutions)
                     // Initialize grades and cheating rates state with default values
                     const initialGrades = {};
                     const initialCheatingRates = {};
                     data.forEach(solution => {
-                        initialGrades[solution.id] = solution.finalGrade || 0;
-                        initialCheatingRates[solution.id] = solution.cheatingResult || 0; // Initialize cheating rate with the fetched value
+                        initialGrades[solution.ID] = solution.FinalGrade;
+                        initialCheatingRates[solution.ID] = solution.CheatingResult; // Initialize cheating rate to 0
                     });
                     setGrades(initialGrades);
                     setCheatingRates(initialCheatingRates);
@@ -65,7 +68,28 @@ const Solutions = () => {
             if (response.ok) {
                 const data = await response.json();
                 console.log('Report generated successfully:', data); // Log the response
-                updateCheatingRate(solutionId, parseFloat(data.cheatingRate)); // Ensure the cheating rate is a number
+                updateCheatingRate(solutionId, data.CheatingRate);
+
+                const refetch = async() => {
+                    const data = await fetch(`http://localhost:8080/api/solutions/solved-task/${examid}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(res => res.json()).catch(console.log)
+
+                    const initialGrades = {};
+                    const initialCheatingRates = {};
+                    data.forEach(solution => {
+                        initialGrades[solution.ID] = solution.FinalGrade;
+                        initialCheatingRates[solution.ID] = solution.CheatingResult; // Initialize cheating rate to 0
+                    });
+                    setGrades(initialGrades);
+                    setCheatingRates(initialCheatingRates);
+                }
+
+                refetch().catch(console.log);
             } else {
                 const errorMsg = await response.text();
                 console.error('Failed to generate report:', errorMsg);
@@ -117,14 +141,26 @@ const Solutions = () => {
         }
     };
 
-    const formatDateTime = (isoString) => {
-        if (!isoString) return 'N/A';
-        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }; // Options to display date and time
+    const fetchSolutionsByStudent = async (studentId) => {
+        const token = localStorage.getItem('token');
+
         try {
-            return new Date(isoString).toLocaleString('en-US', options);
+            const response = await fetch(`http://localhost:8080/api/solutions/by-student/${studentId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Fetched Solutions:', data); // Debugging: log fetched solutions
+                setSolutions(data); // Update state with fetched solutions data
+            } else {
+                console.error('Failed to fetch solutions for student:', response.statusText);
+            }
         } catch (error) {
-            console.error('Error formatting date:', isoString, error); // Debugging: log date format errors
-            return 'Invalid Date';
+            console.error('Error fetching solutions:', error);
         }
     };
 
@@ -144,10 +180,9 @@ const Solutions = () => {
                 <table className="min-w-full table-auto">
                     <thead className="bg-gray-800">
                         <tr>
-                            <th className="px-4 py-2 text-left">ID</th>
+                
                             <th className="px-4 py-2 text-left">Report ID</th>
-                            <th className="px-4 py-2 text-left">Time Start</th>
-                            <th className="px-4 py-2 text-left">Time End</th>
+                            <th className="px-4 py-2 text-left">Solution</th>
                             <th className="px-4 py-2 text-left">Grade</th>
                             <th className="px-4 py-2 text-left">Cheating Rate</th>
                             <th className="px-4 py-2 text-left">Actions</th>
@@ -157,31 +192,30 @@ const Solutions = () => {
                         {solutions.length > 0 ? (
                             solutions.map((solution, index) => (
                                 <tr key={index} className="bg-gray-700 border-b">
-                                    <td className="px-4 py-2">{solution.id}</td>
-                                    <td className="px-4 py-2">{solution.reportID}</td>
-                                    <td className="px-4 py-2">{formatDateTime(solution.timeStart)}</td>
-                                    <td className="px-4 py-2">{formatDateTime(solution.timeEnd)}</td>
+                                    
+                                    <td className="px-4 py-2">{solution.ReportID}</td>
+                                    <td className="px-4 py-2">{solution.Solution}</td>
                                     <td className="px-4 py-2">
                                         <input 
                                             type="number" 
-                                            value={grades[solution.id] || 0} 
-                                            onChange={(e) => handleGradeChange(solution.id, parseInt(e.target.value, 10))} 
+                                            value={grades[solution.ID]}
+                                            onChange={(e) => handleGradeChange(solution.ID, e.target.value)}
                                             className="bg-gray-600 text-white p-2 rounded"
                                         />
                                     </td>
                                     <td className="px-4 py-2">
-                                        {cheatingRates[solution.id] !== undefined ? cheatingRates[solution.id] : 0}
+                                        {cheatingRates[solution.ID] !== undefined ? cheatingRates[solution.ID] : 0}
                                     </td>
                                     <td className="px-4 py-2">
                                         <button 
                                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                            onClick={() => handleUpdateGrade(solution.id)}
+                                            onClick={() => handleUpdateGrade(solution.ID)}
                                         >
                                             Update Grade
                                         </button>
                                         <button 
                                             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
-                                            onClick={() => handleGenerateReport(solution.id)}
+                                            onClick={() => handleGenerateReport(solution.ID)}
                                         >
                                             Generate Cheating Rate
                                         </button>
@@ -190,7 +224,7 @@ const Solutions = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="7" className="text-center py-4">
+                                <td colSpan="6" className="text-center py-4">
                                     No solutions available.
                                 </td>
                             </tr>
