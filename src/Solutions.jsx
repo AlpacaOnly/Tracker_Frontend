@@ -65,7 +65,7 @@ const Solutions = () => {
             if (response.ok) {
                 const data = await response.json();
                 console.log('Report generated successfully:', data); // Log the response
-                updateCheatingRate(solutionId, data.cheatingRate);
+                updateCheatingRate(solutionId, parseFloat(data.cheatingRate)); // Ensure the cheating rate is a number
             } else {
                 const errorMsg = await response.text();
                 console.error('Failed to generate report:', errorMsg);
