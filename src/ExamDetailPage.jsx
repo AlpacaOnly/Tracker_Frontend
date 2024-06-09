@@ -32,8 +32,13 @@ const ExamDetailPage = () => {
                     const data = await response.json();
                     console.log('Fetched data:', data);
                     
-                    console.log('Exam ID:', examid);
-                    setStudentTaskId(examid);
+                    const ids = data.map(item => item.ID);
+                    console.log(ids); 
+                    // Assuming setStudentTaskId is a function that sets the student task ID
+                    ids.forEach(id => {
+                    setStudentTaskId(id);
+                    });
+
                     setExam(data[0]);
                 } else {
                     setLoadingError('Failed to fetch examinations: ' + response.statusText);

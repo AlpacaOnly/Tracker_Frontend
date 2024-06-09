@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Select from 'react-select';
 import Navbar from './Navbar';
 
 const AddExamination = () => {
@@ -8,7 +9,7 @@ const AddExamination = () => {
     const [accessFrom, setAccessFrom] = useState(new Date().toISOString().slice(0, -8)); // Format date for datetime-local input
     const [accessTo, setAccessTo] = useState(new Date().toISOString().slice(0, -8));
     const [students, setStudents] = useState([]);
-    const [selectedStudent, setSelectedStudent] = useState('');
+    const [selectedStudents, setSelectedStudents] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -41,7 +42,6 @@ const AddExamination = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        // console.log('Selected student ID:', selectedStudent); // Log the selected student value
         const token = localStorage.getItem('token');
         const body = JSON.stringify({
             Title: title,
@@ -62,10 +62,9 @@ const AddExamination = () => {
 
             if (response.ok) {
                 const taskData = await response.json();
-                // console.log('Examination added successfully', taskData);
                 
-                // Assign student to the created task
-                await assignStudentToTask(taskData.ID, selectedStudent, token);
+                // Assign students to the created task
+                await assignStudentsToTask(taskData.ID, selectedStudents.map(student => student.value), token);
 
                 navigate('/examinations');
             } else {
@@ -77,26 +76,33 @@ const AddExamination = () => {
         }
     };
 
-    const assignStudentToTask = async (taskId, studentId, token) => {
+    const assignStudentsToTask = async (taskId, studentIds, token) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/tasks/${taskId}/students/${studentId}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            await Promise.all(studentIds.map(async (studentId) => {
+                const response = await fetch(`http://localhost:8080/api/tasks/${taskId}/students/${studentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-            if (response.ok) {
-                console.log('Student assigned to task successfully');
-            } else {
-                const errorMsg = await response.text();
-                throw new Error(errorMsg || 'Failed to assign student to task');
-            }
+                if (!response.ok) {
+                    const errorMsg = await response.text();
+                    throw new Error(errorMsg || 'Failed to assign student to task');
+                }
+            }));
+
+            console.log('Students assigned to task successfully');
         } catch (error) {
-            console.error('Error assigning student to task:', error);
+            console.error('Error assigning students to task:', error);
         }
     };
+
+    const studentOptions = students.map(student => ({
+        value: student.ID,
+        label: `${student.Name} ${student.Surname}`
+    }));
 
     return (
         <div className="flex">
@@ -150,21 +156,15 @@ const AddExamination = () => {
                         />
                     </div>
                     <div className="mb-6">
-                        <label htmlFor="student" className="block text-gray-100 text-sm font-bold mb-2">Assign Student</label>
-                        <select
-                            id="student"
-                            value={selectedStudent}
-                            onChange={(e) => setSelectedStudent(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-100 leading-tight focus:outline-none focus:shadow-outline"
-                            required
-                        >
-                            <option value="">Select a student</option>
-                            {students.map(student => (
-                                <option key={student.ID} value={student.ID}>
-                                    {student.Name} {student.Surname}
-                                </option>
-                            ))}
-                        </select>
+                        <label htmlFor="students" className="block text-gray-100 text-sm font-bold mb-2">Assign Students</label>
+                        <Select
+                            id="students"
+                            isMulti
+                            value={selectedStudents}
+                            onChange={setSelectedStudents}
+                            options={studentOptions}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+                        />
                     </div>
                     <div className="flex items-center justify-between">
                         <button

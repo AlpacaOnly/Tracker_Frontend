@@ -3,77 +3,126 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 
 const Results = () => {
-    const [students, setStudents] = useState([]);
+    const [tasks, setTasks] = useState([]); // State to hold task data
+    const [solutions, setSolutions] = useState([]); // State to hold solutions data
     const navigate = useNavigate();
+    const ID = localStorage.getItem('id');
+    const roleID = localStorage.getItem('roleID');
 
-    // useEffect(() => {
-        // const fetchStudents = async () => {
-        //     const token = localStorage.getItem('token');
-        //     if (!token) {
-        //         navigate('/login'); // Redirect if no token is found
-        //         return;
-        //     }
-        //     try {
-        //         const response = await fetch('http://localhost:8080/api/results', {
-        //             headers: {
-        //                 'Authorization': `Bearer ${token}`,
-        //                 'Content-Type': 'application/json'
-        //             }
-        //         });
-        //         if (response.ok) {
-        //             const data = await response.json();
-        //             setStudents(data); // Assuming 'data' is an array of student objects who passed the exams
-        //         } else {
-        //             throw new Error('Failed to fetch students');
-        //         }
-        //     } catch (error) {
-        //         console.error('Error fetching students:', error);
-        //     }
-        // };
+    useEffect(() => {
+        const token = localStorage.getItem('token'); // Get auth token from local storage
 
-        // fetchStudents();
-    // }, [navigate]);
+        const fetchTasks = async () => {
+            try {
+                const endpoint = roleID === '1'
+                    ? `http://localhost:8080/api/tasks/student/${ID}`
+                    : `http://localhost:8080/api/tasks/teacher/${ID}`;
+                
+                const response = await fetch(endpoint, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-    const handleGrades = (studentId) => {
-        navigate(`/grades/${studentId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Fetched Tasks:', data); // Debugging: log fetched tasks
+                    setTasks(data); // Update state with fetched task data
+
+                    if (roleID === '1') {
+                        fetchSolutionsByStudent(ID);
+                    }
+                } else {
+                    console.error('Failed to fetch tasks:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error fetching tasks:', error);
+            }
+        };
+
+        const fetchSolutionsByStudent = async () => {
+            const token = localStorage.getItem('token');
+
+            try {
+                const response = await fetch(`http://localhost:8080/api/solutions/by-student/${ID}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Fetched Solutions:', data); // Debugging: log fetched solutions
+                    setSolutions(data); // Update state with fetched solutions data
+                } else {
+                    console.error('Failed to fetch solutions for student:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error fetching solutions:', error);
+            }
+        };
+
+        fetchTasks();
+    }, [ID, roleID]);
+
+    const formatDateTime = (isoString) => {
+        if (!isoString) return 'N/A';
+        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }; // Options to display date and time
+        try {
+            return new Date(isoString).toLocaleString('en-US', options);
+        } catch (error) {
+            console.error('Error formatting date:', isoString, error); // Debugging: log date format errors
+            return 'Invalid Date';
+        }
     };
+
+    const renderSolutionsTable = () => (
+        <table className="min-w-full table-auto">
+            <thead className="bg-gray-800">
+                <tr>
+                    <th className="px-4 py-2 text-left">ID</th>
+                    <th className="px-4 py-2 text-left">Cheating Result</th>
+                    <th className="px-4 py-2 text-left">Created At</th>
+                    <th className="px-4 py-2 text-left">Final Grade</th>
+                    <th className="px-4 py-2 text-left">Report</th>
+                    <th className="px-4 py-2 text-left">Solution</th>
+                    <th className="px-4 py-2 text-left">Time End</th>
+                    <th className="px-4 py-2 text-left">Time Start</th>
+                </tr>
+            </thead>
+            <tbody>
+                {solutions.length > 0 ? (
+                    solutions.map((solution) => (
+                        <tr key={solution.ID} className="bg-gray-700 border-b">
+                            <td className="px-4 py-2">{solution.ID}</td>
+                            <td className="px-4 py-2">{solution.CheatingResult}</td>
+                            <td className="px-4 py-2">{formatDateTime(solution.CreatedAt)}</td>
+                            <td className="px-4 py-2">{solution.FinalGrade}</td>
+                            <td className="px-4 py-2">{solution.Report || 'N/A'}</td>
+                            <td className="px-4 py-2">{solution.Solution}</td>
+                            <td className="px-4 py-2">{formatDateTime(solution.TimeEnd)}</td>
+                            <td className="px-4 py-2">{formatDateTime(solution.TimeStart)}</td>
+                        </tr>
+                    ))
+                ) : (
+                    <tr>
+                        <td colSpan="8" className="text-center py-4">
+                            No solutions available.
+                        </td>
+                    </tr>
+                )}
+            </tbody>
+        </table>
+    );
 
     return (
         <div className="flex">
             <Navbar />
             <div className="container mx-auto p-4">
-                <div className="flex items-center justify-between mb-4">
-                    <h1 className="text-xl font-bold text-white">Passed Students</h1>
-                </div>
-                <table className="min-w-full bg-gray-800 text-white">
-                    <thead>
-                        <tr>
-                            <th className="py-2">Student ID</th>
-                            <th className="py-2">Name</th>
-                            <th className="py-2">Surname</th>
-                            <th className="py-2">Grade</th>
-                            <th className="py-2">View Grades</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {students.map(student => (
-                            <tr key={student.ID} className="border-t border-gray-700">
-                                <td className="py-2 px-4">{student.ID}</td>
-                                <td className="py-2 px-4">{student.Name}</td>
-                                <td className="py-2 px-4">{student.Surname}</td>
-                                <td className="py-2 px-4">{student.Grade}</td>
-                                <td className="py-2 px-4">
-                                    <button
-                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
-                                        onClick={() => handleGrades(student.ID)}
-                                    >
-                                        Grades
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                <h1 className="text-xl font-bold text-white mb-4">Solutions</h1>
+                {renderSolutionsTable()}
             </div>
         </div>
     );
