@@ -15,10 +15,7 @@ const Solutions = () => {
 
         const fetchSolutions = async () => {
             try {
-                // Simulating a delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                const response = await fetch(`http://localhost:8080/api/solutions/solved-task/${examid}`, {
+                const response = await fetch(`http://localhost:8080/api/solutions/by-student/${examid}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -34,8 +31,8 @@ const Solutions = () => {
                     const initialGrades = {};
                     const initialCheatingRates = {};
                     data.forEach(solution => {
-                        initialGrades[solution.ID] = solution.finalGrade || 0;
-                        initialCheatingRates[solution.ID] = 0; // Initialize cheating rate to 0
+                        initialGrades[solution.id] = solution.finalGrade || 0;
+                        initialCheatingRates[solution.id] = solution.cheatingResult || 0; // Initialize cheating rate with the fetched value
                     });
                     setGrades(initialGrades);
                     setCheatingRates(initialCheatingRates);
@@ -68,7 +65,7 @@ const Solutions = () => {
             if (response.ok) {
                 const data = await response.json();
                 console.log('Report generated successfully:', data); // Log the response
-                updateCheatingRate(solutionId, data.CheatingRate);
+                updateCheatingRate(solutionId, data.cheatingRate);
             } else {
                 const errorMsg = await response.text();
                 console.error('Failed to generate report:', errorMsg);
@@ -160,31 +157,31 @@ const Solutions = () => {
                         {solutions.length > 0 ? (
                             solutions.map((solution, index) => (
                                 <tr key={index} className="bg-gray-700 border-b">
-                                    <td className="px-4 py-2">{solution.ID}</td>
-                                    <td className="px-4 py-2">{solution.ReportID}</td>
-                                    <td className="px-4 py-2">{formatDateTime(solution.TimeStart)}</td>
-                                    <td className="px-4 py-2">{formatDateTime(solution.TimeEnd)}</td>
+                                    <td className="px-4 py-2">{solution.id}</td>
+                                    <td className="px-4 py-2">{solution.reportID}</td>
+                                    <td className="px-4 py-2">{formatDateTime(solution.timeStart)}</td>
+                                    <td className="px-4 py-2">{formatDateTime(solution.timeEnd)}</td>
                                     <td className="px-4 py-2">
                                         <input 
                                             type="number" 
-                                            value={grades[solution.ID] || 0} 
-                                            onChange={(e) => handleGradeChange(solution.ID, parseInt(e.target.value, 10))} 
+                                            value={grades[solution.id] || 0} 
+                                            onChange={(e) => handleGradeChange(solution.id, parseInt(e.target.value, 10))} 
                                             className="bg-gray-600 text-white p-2 rounded"
                                         />
                                     </td>
                                     <td className="px-4 py-2">
-                                        {cheatingRates[solution.ID] !== undefined ? cheatingRates[solution.ID] : 0}
+                                        {cheatingRates[solution.id] !== undefined ? cheatingRates[solution.id] : 0}
                                     </td>
                                     <td className="px-4 py-2">
                                         <button 
                                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                            onClick={() => handleUpdateGrade(solution.ID)}
+                                            onClick={() => handleUpdateGrade(solution.id)}
                                         >
                                             Update Grade
                                         </button>
                                         <button 
                                             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
-                                            onClick={() => handleGenerateReport(solution.ID)}
+                                            onClick={() => handleGenerateReport(solution.id)}
                                         >
                                             Generate Cheating Rate
                                         </button>
