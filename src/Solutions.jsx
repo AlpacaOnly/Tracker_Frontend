@@ -7,6 +7,7 @@ const Solutions = () => {
     const [solutions, setSolutions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [grades, setGrades] = useState({}); // State to manage grades
 
     useEffect(() => {
         const token = localStorage.getItem('token'); // Get auth token from local storage
@@ -42,6 +43,65 @@ const Solutions = () => {
         fetchSolutions();
     }, [examid]);
 
+    const handleGenerateReport = async (solutionId) => {
+        const token = localStorage.getItem('token'); // Get auth token from local storage
+        const cheatingRateData = { cheatingRate: 0 }; // Example data, modify as needed
+        try {
+            const response = await fetch(`http://localhost:8080/api/solutions/generate-cheating-rate/${solutionId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(cheatingRateData)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Report generated successfully:', data); // Log the response
+            } else {
+                const errorMsg = await response.text();
+                console.error('Failed to generate report:', errorMsg);
+            }
+        } catch (error) {
+            console.error('Error generating report:', error);
+        }
+    };
+
+    const handleGradeChange = (solutionId, grade) => {
+        setGrades({
+            ...grades,
+            [solutionId]: grade,
+        });
+    };
+
+    const handleUpdateGrade = async (solutionId) => {
+        const token = localStorage.getItem('token'); // Get auth token from local storage
+        const gradeData = { finalGrade: grades[solutionId] }; // Get the grade from state
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/solutions/update-final-grade/${solutionId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(gradeData)
+            });
+
+            if (response.ok) {
+                const responseText = await response.text(); // Get the response as text
+                const data = responseText ? JSON.parse(responseText) : {}; // Parse the JSON if not empty
+                console.log('Grade updated successfully:', data); // Log the response
+            } else {
+                const errorMsg = await response.text();
+                console.error('Failed to update grade:', errorMsg);
+            }
+        } catch (error) {
+            console.error('Error updating grade:', error);
+        }
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -59,11 +119,11 @@ const Solutions = () => {
                     <thead className="bg-gray-800">
                         <tr>
                             <th className="px-4 py-2 text-left">ID</th>
-                            <th className="px-4 py-2 text-left">Student ID</th>
-                            <th className="px-4 py-2 text-left">Solution</th>
                             <th className="px-4 py-2 text-left">Report ID</th>
                             <th className="px-4 py-2 text-left">Time Start</th>
                             <th className="px-4 py-2 text-left">Time End</th>
+                            <th className="px-4 py-2 text-left">Grade</th>
+                            <th className="px-4 py-2 text-left">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,13 +131,31 @@ const Solutions = () => {
                             solutions.map((solution, index) => (
                                 <tr key={index} className="bg-gray-700 border-b">
                                     <td className="px-4 py-2">{solution.ID}</td>
-                                    <td className="px-4 py-2">{solution.StudentTask ? solution.StudentTask.student?.id || 'N/A' : 'N/A'}</td>
-                                    <td className="px-4 py-2">
-                                        <pre>{solution.Solution || 'No solution provided'}</pre>
-                                    </td>
                                     <td className="px-4 py-2">{solution.ReportID}</td>
                                     <td className="px-4 py-2">{solution.TimeStart}</td>
                                     <td className="px-4 py-2">{solution.TimeEnd}</td>
+                                    <td className="px-4 py-2">
+                                        <input 
+                                            type="number" 
+                                            value={grades[solution.ID] || ''} 
+                                            onChange={(e) => handleGradeChange(solution.ID, e.target.value)} 
+                                            className="bg-gray-600 text-white p-2 rounded"
+                                        />
+                                    </td>
+                                    <td className="px-4 py-2">
+                                        <button 
+                                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                            onClick={() => handleUpdateGrade(solution.ID)}
+                                        >
+                                            Update Grade
+                                        </button>
+                                        <button 
+                                            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
+                                            onClick={() => handleGenerateReport(solution.ID)}
+                                        >
+                                            Generate Report
+                                        </button>
+                                    </td>
                                 </tr>
                             ))
                         ) : (

@@ -34,9 +34,7 @@ const ExamDetailPage = () => {
                     
                     console.log('Exam ID:', examid);
                     setStudentTaskId(examid);
-    
-                        setExam(data[0])
-                    
+                    setExam(data[0]);
                 } else {
                     setLoadingError('Failed to fetch examinations: ' + response.statusText);
                 }
@@ -104,28 +102,31 @@ const ExamDetailPage = () => {
         clearInterval(intervalId);
         setExamStarted(false);
 
-        try {
-            const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:8080/api/solutions/on-student-task/${studentTaskId}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ solution })
-            });
-            if (response.ok) {
-                setSubmissionMessage("Your exam has been submitted and is pending review by a teacher. You will see your grade on the Grades page.");
-                setSolution("");
-            } else {
-                const errorMsg = await response.text();
-                console.error('Failed to submit solution:', errorMsg);
-                setSubmissionMessage("Failed to submit your exam. Please try again.");
+        // Add a 5-second delay before fetching the solutions
+        setTimeout(async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const response = await fetch(`http://localhost:8080/api/solutions/on-student-task/${studentTaskId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ solution })
+                });
+                if (response.ok) {
+                    setSubmissionMessage("Your exam has been submitted and is pending review by a teacher. You will see your grade on the Grades page.");
+                    setSolution("");
+                } else {
+                    const errorMsg = await response.text();
+                    console.error('Failed to submit solution:', errorMsg);
+                    setSubmissionMessage("Failed to submit your exam. Please try again.");
+                }
+            } catch (error) {
+                console.error('Error submitting solution:', error);
+                setSubmissionMessage("An error occurred while submitting your exam. Please try again.");
             }
-        } catch (error) {
-            console.error('Error submitting solution:', error);
-            setSubmissionMessage("An error occurred while submitting your exam. Please try again.");
-        }
+        }, 2000); // 2-second delay
     };
 
     const formatTime = (totalSeconds) => {
