@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import Select from 'react-select';
 import Navbar from './Navbar';
 
 const UpdateExamination = () => {
@@ -8,7 +9,7 @@ const UpdateExamination = () => {
     const [accessFrom, setAccessFrom] = useState('');
     const [accessTo, setAccessTo] = useState('');
     const [students, setStudents] = useState([]);
-    const [selectedStudent, setSelectedStudent] = useState('');
+    const [selectedStudents, setSelectedStudents] = useState([]); // Handle multiple selections
     const { examid } = useParams();
     const navigate = useNavigate();
     const ID = localStorage.getItem('ID'); // Assuming this is the TeacherID
@@ -33,7 +34,6 @@ const UpdateExamination = () => {
                     setDescription(data.Description);
                     setAccessFrom(new Date(data.AccessFrom).toISOString().slice(0, -8));
                     setAccessTo(new Date(data.AccessTo).toISOString().slice(0, -8));
-                    setSelectedStudent(data.StudentID);
                 } else {
                     throw new Error('Failed to fetch examination details');
                 }
@@ -72,8 +72,8 @@ const UpdateExamination = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        if (!selectedStudent) {
-            console.error('No student selected');
+        if (selectedStudents.length === 0) {
+            console.error('No students selected');
             return;
         }
 
@@ -99,22 +99,25 @@ const UpdateExamination = () => {
             if (response.ok) {
                 console.log('Examination updated successfully');
 
-                // Assign the student to the task
-                const assignResponse = await fetch(`http://localhost:8080/api/users/${selectedStudent}/add-to-task/${examid}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+                // Assign the selected students to the task
+                for (const student of selectedStudents) {
+                    const assignResponse = await fetch(`http://localhost:8080/api/users/${student.value}/add-to-task/${examid}`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
 
-                if (assignResponse.ok) {
-                    console.log('Student assigned to the task successfully');
-                    navigate('/examinations');
-                } else {
-                    const errorMsg = await assignResponse.text();
-                    throw new Error(errorMsg || 'Failed to assign student to the task');
+                    if (assignResponse.ok) {
+                        console.log(`Student ${student.label} assigned to the task successfully`);
+                    } else {
+                        const errorMsg = await assignResponse.text();
+                        throw new Error(errorMsg || `Failed to assign student ${student.label} to the task`);
+                    }
                 }
+
+                navigate('/examinations');
             } else {
                 const errorMsg = await response.text();
                 throw new Error(errorMsg || 'Failed to update examination');
@@ -123,6 +126,11 @@ const UpdateExamination = () => {
             console.error('Error updating examination:', error);
         }
     };
+
+    const studentOptions = students.map(student => ({
+        value: student.ID,
+        label: `${student.Name} ${student.Surname}`
+    }));
 
     return (
         <div className="flex h-[calc(100vh-2rem)]">
@@ -176,21 +184,15 @@ const UpdateExamination = () => {
                         />
                     </div>
                     <div className="mb-6">
-                        <label htmlFor="student" className="block text-gray-100 text-sm font-bold mb-2">Assign Student</label>
-                        <select
+                        <label htmlFor="student" className="block text-gray-100 text-sm font-bold mb-2">Assign Students</label>
+                        <Select
                             id="student"
-                            value={selectedStudent}
-                            onChange={(e) => setSelectedStudent(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-100 leading-tight focus:outline-none focus:shadow-outline"
-                            required
-                        >
-                            <option value="">Select a student</option>
-                            {students.map(student => (
-                                <option key={student.ID} value={student.ID}>
-                                    {student.Name} {student.Surname}
-                                </option>
-                            ))}
-                        </select>
+                            isMulti
+                            value={selectedStudents}
+                            onChange={setSelectedStudents}
+                            options={studentOptions}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 leading-tight focus:outline-none focus:shadow-outline"
+                        />
                     </div>
                     <div className="flex items-center justify-between">
                         <button

@@ -28,6 +28,13 @@ const Solutions = () => {
                     const data = await response.json();
                     console.log(data); // Log the data to inspect its structure
                     setSolutions(data || []); // Update state with fetched solutions data, ensure it is an array
+
+                    // Initialize grades state with default values
+                    const initialGrades = {};
+                    data.forEach(solution => {
+                        initialGrades[solution.ID] = solution.finalGrade || 0;
+                    });
+                    setGrades(initialGrades);
                 } else {
                     const errorMsg = await response.text();
                     throw new Error(errorMsg || 'Failed to fetch solutions');
@@ -137,8 +144,8 @@ const Solutions = () => {
                                     <td className="px-4 py-2">
                                         <input 
                                             type="number" 
-                                            value={grades[solution.ID] || ''} 
-                                            onChange={(e) => handleGradeChange(solution.ID, e.target.value)} 
+                                            value={grades[solution.ID] || 0} 
+                                            onChange={(e) => handleGradeChange(solution.ID, parseInt(e.target.value, 10))} 
                                             className="bg-gray-600 text-white p-2 rounded"
                                         />
                                     </td>
