@@ -180,7 +180,6 @@ const Solutions = () => {
                 <table className="min-w-full table-auto">
                     <thead className="bg-gray-800">
                         <tr>
-                
                             <th className="px-4 py-2 text-left">Report ID</th>
                             <th className="px-4 py-2 text-left">Solution</th>
                             <th className="px-4 py-2 text-left">Grade</th>
@@ -192,7 +191,6 @@ const Solutions = () => {
                         {solutions.length > 0 ? (
                             solutions.map((solution, index) => (
                                 <tr key={index} className="bg-gray-700 border-b">
-                                    
                                     <td className="px-4 py-2">{solution.ReportID}</td>
                                     <td className="px-4 py-2">{solution.Solution}</td>
                                     <td className="px-4 py-2">
@@ -200,7 +198,7 @@ const Solutions = () => {
                                             type="number" 
                                             value={grades[solution.ID]}
                                             onChange={(e) => handleGradeChange(solution.ID, e.target.value)}
-                                            className="bg-gray-600 text-white p-2 rounded"
+                                            className="bg-gray-600 text-white p-2 rounded w-16" // Adjusted width
                                         />
                                     </td>
                                     <td className="px-4 py-2">
