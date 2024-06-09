@@ -5,6 +5,7 @@ import Navbar from './Navbar';
 const Results = () => {
     const [tasks, setTasks] = useState([]); // State to hold task data
     const [solutions, setSolutions] = useState([]); // State to hold solutions data
+    const [cheatingRate, setCheatingRate] = useState(null); // State to hold cheating rate data
     const navigate = useNavigate();
     const ID = localStorage.getItem('id');
     const roleID = localStorage.getItem('roleID');
@@ -78,6 +79,29 @@ const Results = () => {
         }
     };
 
+    const generateReport = async () => {
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/cheating-rate/${ID}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Cheating Rate:', data); // Debugging: log cheating rate
+                setCheatingRate(data.CheatingRate); // Update state with fetched cheating rate data
+            } else {
+                console.error('Failed to fetch cheating rate:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error fetching cheating rate:', error);
+        }
+    };
+
     const renderSolutionsTable = () => (
         <table className="min-w-full table-auto">
             <thead className="bg-gray-800">
@@ -90,6 +114,7 @@ const Results = () => {
                     <th className="px-4 py-2 text-left">Solution</th>
                     <th className="px-4 py-2 text-left">Time End</th>
                     <th className="px-4 py-2 text-left">Time Start</th>
+                    <th className="px-4 py-2 text-left">Cheating Rate</th>
                 </tr>
             </thead>
             <tbody>
@@ -104,11 +129,12 @@ const Results = () => {
                             <td className="px-4 py-2">{solution.Solution}</td>
                             <td className="px-4 py-2">{formatDateTime(solution.TimeEnd)}</td>
                             <td className="px-4 py-2">{formatDateTime(solution.TimeStart)}</td>
+                            <td className="px-4 py-2">{cheatingRate !== null ? cheatingRate : 'N/A'}</td>
                         </tr>
                     ))
                 ) : (
                     <tr>
-                        <td colSpan="8" className="text-center py-4">
+                        <td colSpan="9" className="text-center py-4">
                             No solutions available.
                         </td>
                     </tr>
@@ -122,6 +148,12 @@ const Results = () => {
             <Navbar />
             <div className="container mx-auto p-4">
                 <h1 className="text-xl font-bold text-white mb-4">Solutions</h1>
+                <button
+                    onClick={generateReport}
+                    className="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                    Generate Report
+                </button>
                 {renderSolutionsTable()}
             </div>
         </div>
