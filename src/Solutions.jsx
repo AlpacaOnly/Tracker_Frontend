@@ -68,10 +68,7 @@ const Solutions = () => {
             if (response.ok) {
                 const data = await response.json();
                 console.log('Report generated successfully:', data); // Log the response
-                setCheatingRates(prevState => ({
-                    ...prevState,
-                    [solutionId]: data.CheatingRate
-                }));
+                updateCheatingRate(solutionId, data.CheatingRate);
             } else {
                 const errorMsg = await response.text();
                 console.error('Failed to generate report:', errorMsg);
@@ -79,6 +76,13 @@ const Solutions = () => {
         } catch (error) {
             console.error('Error generating report:', error);
         }
+    };
+
+    const updateCheatingRate = (solutionId, cheatingRate) => {
+        setCheatingRates(prevState => ({
+            ...prevState,
+            [solutionId]: cheatingRate
+        }));
     };
 
     const handleGradeChange = (solutionId, grade) => {
