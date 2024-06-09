@@ -3,11 +3,12 @@ import { useParams } from 'react-router-dom';
 import Navbar from './Navbar';
 
 const Solutions = () => {
-    const { examid } = useParams(); // Get the task ID from the URL parameters
+    const { examid } = useParams(); // Get the exam ID from the URL parameters
     const [solutions, setSolutions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [grades, setGrades] = useState({}); // State to manage grades
+    const [cheatingRates, setCheatingRates] = useState({}); // State to manage cheating rates
 
     useEffect(() => {
         const token = localStorage.getItem('token'); // Get auth token from local storage
@@ -31,10 +32,13 @@ const Solutions = () => {
 
                     // Initialize grades state with default values
                     const initialGrades = {};
+                    const initialCheatingRates = {};
                     data.forEach(solution => {
                         initialGrades[solution.ID] = solution.finalGrade || 0;
+                        initialCheatingRates[solution.ID] = solution.CheatingRate || 'N/A';
                     });
                     setGrades(initialGrades);
+                    setCheatingRates(initialCheatingRates);
                 } else {
                     const errorMsg = await response.text();
                     throw new Error(errorMsg || 'Failed to fetch solutions');
@@ -52,20 +56,22 @@ const Solutions = () => {
 
     const handleGenerateReport = async (solutionId) => {
         const token = localStorage.getItem('token'); // Get auth token from local storage
-        const cheatingRateData = { cheatingRate: 0 }; // Example data, modify as needed
         try {
             const response = await fetch(`http://localhost:8080/api/solutions/generate-cheating-rate/${solutionId}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(cheatingRateData)
+                }
             });
 
             if (response.ok) {
                 const data = await response.json();
                 console.log('Report generated successfully:', data); // Log the response
+                setCheatingRates(prevState => ({
+                    ...prevState,
+                    [solutionId]: data.CheatingRate
+                }));
             } else {
                 const errorMsg = await response.text();
                 console.error('Failed to generate report:', errorMsg);
@@ -109,6 +115,17 @@ const Solutions = () => {
         }
     };
 
+    const formatDateTime = (isoString) => {
+        if (!isoString) return 'N/A';
+        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }; // Options to display date and time
+        try {
+            return new Date(isoString).toLocaleString('en-US', options);
+        } catch (error) {
+            console.error('Error formatting date:', isoString, error); // Debugging: log date format errors
+            return 'Invalid Date';
+        }
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -130,6 +147,7 @@ const Solutions = () => {
                             <th className="px-4 py-2 text-left">Time Start</th>
                             <th className="px-4 py-2 text-left">Time End</th>
                             <th className="px-4 py-2 text-left">Grade</th>
+                            <th className="px-4 py-2 text-left">Cheating Rate</th>
                             <th className="px-4 py-2 text-left">Actions</th>
                         </tr>
                     </thead>
@@ -139,8 +157,8 @@ const Solutions = () => {
                                 <tr key={index} className="bg-gray-700 border-b">
                                     <td className="px-4 py-2">{solution.ID}</td>
                                     <td className="px-4 py-2">{solution.ReportID}</td>
-                                    <td className="px-4 py-2">{solution.TimeStart}</td>
-                                    <td className="px-4 py-2">{solution.TimeEnd}</td>
+                                    <td className="px-4 py-2">{formatDateTime(solution.TimeStart)}</td>
+                                    <td className="px-4 py-2">{formatDateTime(solution.TimeEnd)}</td>
                                     <td className="px-4 py-2">
                                         <input 
                                             type="number" 
@@ -148,6 +166,9 @@ const Solutions = () => {
                                             onChange={(e) => handleGradeChange(solution.ID, parseInt(e.target.value, 10))} 
                                             className="bg-gray-600 text-white p-2 rounded"
                                         />
+                                    </td>
+                                    <td className="px-4 py-2">
+                                        {cheatingRates[solution.ID] !== undefined ? cheatingRates[solution.ID] : 'N/A'}
                                     </td>
                                     <td className="px-4 py-2">
                                         <button 
@@ -167,7 +188,7 @@ const Solutions = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" className="text-center py-4">
+                                <td colSpan="7" className="text-center py-4">
                                     No solutions available.
                                 </td>
                             </tr>
